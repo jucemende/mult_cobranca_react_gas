@@ -7,7 +7,6 @@ class Encargo {
     aplicacao,
     recorrencia,
     criadoEm = null,
-    atualizadoEm = null
   }) {
 
     this._id = id;
@@ -16,8 +15,7 @@ class Encargo {
     this._aplicacao = this._validarAplicacao(aplicacao);
     this._recorrencia = this._validarRecorrencia(recorrencia);
     this._criadoEm = criadoEm;
-    this._atualizadoEm = atualizadoEm;
-
+    
     Object.freeze(this);
   }
 
@@ -27,8 +25,7 @@ class Encargo {
   get aplicacao() { return this._aplicacao; }
   get recorrencia() { return this._recorrencia; }
   get criadoEm() { return this._criadoEm; }
-  get atualizadoEm() { return this._atualizadoEm; }
-
+  
   isJuros() {
     return this._tipoCobranca === 'JUROS';
   }
@@ -48,15 +45,14 @@ class Encargo {
       tipoCobranca: dados.tipoCobranca ?? this._tipoCobranca,
       aplicacao: dados.aplicacao ?? this._aplicacao,
       recorrencia: dados.recorrencia ?? this._recorrencia,
-      criadoEm: this._criadoEm,
-      atualizadoEm: new Date().toISOString()
+      criadoEm: dados.criadoEm ?? this._criadoEm,
     });
   }
 
   _validarTaxa(valor) {
     const numero = Number(valor);
     if (isNaN(numero) || numero < 0) {
-      throw new Error('Taxa de juros inválida');
+      throw new Error(`Taxa de juros inválida`);
     }
     return numero;
   }
@@ -92,8 +88,7 @@ class Encargo {
       tipoCobranca: this._tipoCobranca,
       aplicacao: this._aplicacao,
       recorrencia: this._recorrencia,
-      criadoEm: this._criadoEm,
-      atualizadoEm: this._atualizadoEm
+      criadoEm: this._criadoEm
     };
   }
 

@@ -5,16 +5,20 @@
  */
 class EncargosRepository {
 
-  findAll() {
+  select( params ) {
     throw new Error('Método findAll() não implementado');
   }
 
-  findById(id) {
+  selectById(id, params) {
     throw new Error('Método findById() não implementado');
   }
 
-  save(encargo) {
+  create(encargo) {
     throw new Error('Método save() não implementado');
+  }
+
+  update(encargo) {
+    throw new Error('Método update() não implementado');
   }
 
   delete(id) {
