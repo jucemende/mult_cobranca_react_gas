@@ -10,9 +10,7 @@ function EncargosRouters(request) {
   switch (method.toUpperCase()) {
 
     case 'GET':
-      return id
-        ? controller.get({ id, params })
-        : controller.getAll({ params });
+      return controller.get({ id, params })
 
     case 'POST':
       return controller.post({ data: body });

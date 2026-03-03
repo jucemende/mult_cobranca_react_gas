@@ -1,0 +1,284 @@
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: "Poppins", sans-serif;
+    font-weight: 300;
+    font-style: normal;
+    font-size: 13px;
+  }
+
+  :root {
+    --cor-fundo: #f1f1f2;
+    --cor-roverTable: #caecbf50;
+    --cor-verde-padrao: #4caf50;
+    --cor-verde: rgba(0, 255, 0, 0.5);
+    --cor-vermelho: rgba(255, 0, 0, 0.5);
+    --cor-amarelo: rgba(255, 255, 0, 0.5);
+    --cor-navebar: #00543d;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translatex(-20px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translatex(0);
+    }
+  }
+
+  @keyframes fadeOut {
+    from {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    to {
+      opacity: 0;
+      transform: translateY(-20px);
+    }
+  }
+
+  body {
+    height: 100vh;
+    display: flex;
+  }
+
+  .root{
+    width: 100vw;
+    height: 100vh;
+  }
+
+  main {
+    margin-left: 250px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    padding: 0 30px;
+    box-sizing: border-box;
+    overflow: auto;
+  }
+
+  .modal-confirm {
+    position: absolute;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    padding: 15px;
+    z-index: 999;
+    background: rgba(0, 0, 0, 0.15);
+
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    animation: fadeIn 0.5s ease-in-out;
+    box-sizing: border-box;
+
+    & p {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 25px;
+    }
+
+    & .modal-content {
+      width: 450px;
+      max-width: 100%;
+      background-color: white;
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    & .modal-buttons {
+      display: flex;
+      gap: 15px;
+    }
+  }
+
+  .conteiner-titulo-pag {
+    margin-bottom: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: end;
+    border-bottom: 1px solid #ccc;
+    padding-bottom: 15px;
+  }
+
+  .conteiner-titulo-pag h1 {
+    margin-top: 5px;
+    font-size: 23px;
+    font-weight: 600;
+    color: var(--cor-verde-padrao);
+  }
+
+  /*Estilizações para os inputs*/
+  input[type=number]::-webkit-inner-spin-button,
+  input[type=number]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  input[type=number] {
+    -moz-appearance: textfield;
+  }
+
+  input,
+  select,
+  textarea {
+    width: 100%;
+    padding: 8px 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    transition: all 0.3s;
+    resize: none;
+  }
+
+  input,
+  select {
+    height: 38px;
+  }
+  
+  .select-wrapper::after {
+    pointer-events: none;
+    content: ' ';
+    display: block;
+    position: absolute;
+    top: 72%;
+    right: 15px;
+    margin-top: -3px;
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 5px 5px 0 5px;
+    border-color: #808080 transparent transparent transparent;
+  }
+
+  .select-wrapper {
+    position: relative;
+    width: 100%;
+  }
+
+  select {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+
+    width: 100%;
+  }
+
+  input:focus,
+  select:focus,
+  textarea:focus {
+    border-color: var(--cor-verde);
+    outline: none;
+    box-shadow: 0 0 6px rgba(76, 175, 80, 0.3);
+  }
+
+  label {
+    display: block;
+    margin-bottom: 5px;
+    color: #626262;
+  }
+
+  /* Estilização para os botões padrão */
+  button.btn-primario,
+  label.btn-primario {
+    width: 100%;
+    padding: 10px;
+    background: var(--cor-navebar);
+    border: none;
+    border-radius: 8px;
+    color: white;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.3s ease, transform 0.2s;
+  }
+
+  .btn-primario:disabled,
+  .btn-secundario:disabled {
+    background-color: #ccc;
+    border: 2px solid #ccc;
+    color: white;
+    cursor: not-allowed;
+    opacity: 0.7;
+  }
+
+  button.btn-primario:hover,
+  label.btn-primario:hover,
+  a.btn-secundario {
+    background: var(--cor-verde-padrao);
+    transform: scale(1.03);
+  }
+
+  button.btn-secundario:hover,
+  label.btn-secundario:hover,
+  a.btn-secundario {
+    transform: scale(1.03);
+  }
+
+  button.btn-secundario,
+  label.btn-secundario {
+    width: 100%;
+    padding: 10px;
+    background: none;
+    border: 2px solid var(--cor-navebar);
+    border-radius: 8px;
+    color: var(--cor-navebar);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.3s ease, transform 0.2s;
+  }
+
+  .toast {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    min-width: 200px;
+    max-width: 300px;
+    background: #333;
+    color: white;
+    padding: 12px 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    opacity: 0;
+    transform: translateY(-20px);
+    transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+    z-index: 9999;
+    font-family: Arial, sans-serif;
+  }
+
+  .toast.show {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .toast.success {
+    background: #4CAF50;
+  }
+
+  .toast.error {
+    background: #f44336;
+  }
+
+  .toast.info {
+    background: #2196F3;
+  }
+
+  @keyframes bounce {
+    to {
+      transform: translateY(-15px);
+      opacity: 0.6;
+    }
+  }
+</style>

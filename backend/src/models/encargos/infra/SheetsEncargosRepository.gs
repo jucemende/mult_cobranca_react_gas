@@ -1,3 +1,13 @@
+function Teste () {
+
+  const repository = new SheetsEncargosRepository()
+
+  const data = repository.select2()
+
+  console.log(data)
+
+}
+
 class SheetsEncargosRepository extends EncargosRepository {
 
   constructor() {
@@ -8,17 +18,64 @@ class SheetsEncargosRepository extends EncargosRepository {
     });
   }
 
-  select(params) {
-    return this.db.getAll(params)
+  getAll() {
+    return this.db.select()
       .map(row => this._toEntity(row));
   }
 
-  selectById(id, params) {
-    const row = this.db.getById(id, params);
+  getById(id) {
+    const row = this.db.select(id)
+      .find(r =>
+      String(r.id) === String(id)
+    ) || null;
+
     return row ? this._toEntity(row) : null;
+
   }
 
-  create(encargo) {
+  applyAdvancedSearch(rows = [], value = '') {
+    const searchableFields = [
+      'tipoCobranca',
+      'aplicacao',
+      'recorrencia'
+    ];
+
+    const normalized = value.toUpperCase();
+
+    return rows.filter(row =>
+      searchableFields.some(field =>
+        String(row[field] || '')
+          .toUpperCase()
+          .includes(normalized)
+      )
+    );
+  }
+
+  applyFilters(rows = [], params = {}) {
+
+    const fieldMap = {
+      taxaJuros: row => row.taxaJuros,
+      tipoCobranca: row => row.tipoCobranca,
+      aplicacao: row => row.aplicacao,
+      recorrencia: row => row.recorrencia
+    };
+
+    const filters = buildFilters(params, fieldMap);
+
+    if (!filters) {
+      return rows
+    }
+
+    return rows.filter(row =>
+      filters.every(({ accessor, op, value }) => {
+        const operatorFn = getOperator(op);
+        return operatorFn(accessor(row), value);
+      })
+    );
+    
+  }
+
+  insert(encargo) {
     
     this.db.insert(this._toPersistence(encargo));
     return encargo;

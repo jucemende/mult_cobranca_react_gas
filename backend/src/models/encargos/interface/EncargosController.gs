@@ -1,6 +1,18 @@
-function teste(){
-  console.log('Testado')
+function testEncargosController() {
+
+  const id = ''
+  const params = {
+    //search: { op: '=', value: 'JUR' },
+    //taxaJuros: { op: '>=', value: 0.02 }
+  }
+
+  const controller = EncargosController
+
+  const data = controller.get({id, params})
+
+  console.log(data)
 }
+
 
 class EncargosController {
 
@@ -10,12 +22,26 @@ class EncargosController {
     });
   }
 
-  static getAll({ params }) {
-    return this.service().select( params );
-  }
+  static get({ id = null, params = {} }) {
+    
+    const data = () => {
 
-  static get({ id, params }) {
-    return this.service().selectById(id, params);
+      if(id) {
+        return this.service().getById(id)
+      }
+    
+      return this.service().getAll(params);
+
+    }
+
+    const { tableConfig, filterConfig } = getConfigEncargo()
+
+    return {
+      data: data(),
+      tableConfig,
+      filterConfig
+    }
+
   }
 
   static post({ data }) {

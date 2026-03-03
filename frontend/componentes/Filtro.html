@@ -1,0 +1,211 @@
+<script type="text/babel">
+
+  const Filtro = ({config = []}) => {
+
+    function renderField(field) {
+      switch (field.element) {
+
+        case 'input':
+          return (
+            <div>
+              <label>{field.label}</label>
+              <input 
+                type={field.type}
+                name={field.name}
+              >
+              </input>
+            </div>
+          )
+        
+        case 'select':
+          return (
+            <div className="select-wrapper">
+              <label>{field.label}</label>
+              <select name={field.name}>
+                <option value="">Selecione</option>
+                {field.options.map(opt => (
+                  <option value={opt.value}>{opt.value}</option>
+                ))}
+              </select>
+            </div>
+          )
+
+        default:
+          return null
+      }
+    }
+
+    React.useEffect(() => {
+      if (window.lucide) window.lucide.createIcons();
+      console.log(config)
+    }, []);
+
+    return (
+      <div className="tela-filtros">
+        <form className="form-filtros">
+
+          <div className="conteiner-title-filters">
+            <h1>Filtrar por</h1>
+            <button type="button">
+                <i data-lucide="x"></i>
+            </button>
+          </div>
+
+          <div className="conteiner-fields">
+            {config.map(renderField)}
+          </div>
+
+          <div className="conteiner-btnFiltros">
+            <button type="reset" class="btn-secundario">Limpar</button>
+            <button type="button" class="btn-primario">Filtrar</button>
+          </div>
+        </form>
+      </div>
+    )
+  }
+</script>
+
+<style>
+  .tela-filtros {
+    position: absolute;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 888;
+    background: rgba(0, 0, 0, 0.15);
+
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+
+    box-sizing: border-box;
+  }
+
+  .tela-filtros.fade-in {
+    display: flex;
+    animation: fadeIn 0.45s forwards;
+  }
+
+  .form-filtros {
+    background-color: white;
+    min-width: 500px;
+    width: fit-content;
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  }
+
+  .conteiner-periodos {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .conteiner-btnFiltros {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    max-width: 300px;
+    margin-left: auto;
+    margin-top: 20px;
+  }
+
+  .conteiner-fields {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .conteiner-ckFiltros,
+  .conteiner-selects-filtros {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .conteiner-selects-filtros {
+    flex-direction: column;
+  }
+
+  .conteiner-title-filters {
+    display: flex;
+    width: 100%;
+    height: 30px;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px
+  }
+
+  .conteiner-title-filters button,
+  .header-faturas-cliente button {
+    width: 25px;
+    height: 25px;
+    padding: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    cursor: pointer;
+    border-radius: 50%;
+  }
+
+  .conteiner-title-filters button svg,
+  .header-faturas-cliente button svg {
+    color: #626262;
+  }
+
+  .conteiner-title-filters button:hover,
+  .header-faturas-cliente button:hover {
+    background-color: var(--cor-fundo);
+  }
+
+  .tela-filtros h1 {
+    font-weight: 400;
+    font-size: 18px;
+  }
+
+  .tbl-filtros {
+    margin: 20px 0 8px 0;
+    font-weight: 500;
+  }
+
+  .conteiner-ckFiltros {
+    margin-bottom: 20px;
+    display: flex;
+    flex-wrap: wrap;
+  }
+
+  .ck-label input[type="checkbox"],
+  .ck-label input[type="radio"] {
+    display: none;
+  }
+
+  .ck-label {
+    padding: 5px 16px;
+    border: 1px solid var(--cor-navebar);
+    border-radius: 30px;
+    cursor: pointer;
+    color: var(--cor-navebar);
+    font-weight: 400;
+    transition: background 0.3s;
+    user-select: none;
+    white-space: nowrap;
+  }
+
+  .ck-label:hover {
+    background: var(--cor-verde-padrao);
+    border: 1px solid var(--cor-verde-padrao);
+    color: white;
+  }
+
+  .ck-label:has(input[type="checkbox"]:checked),
+  .ck-label:has(input[type="radio"]:checked) {
+    background: var(--cor-verde-padrao);
+    border: 1px solid var(--cor-verde-padrao);
+    color: white;
+  }
+</style>

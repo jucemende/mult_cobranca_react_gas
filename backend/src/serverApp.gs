@@ -1,3 +1,13 @@
+function TesteApp() {
+  const request ={
+    url: 'encargos'
+  }
+
+  console.log(request)
+
+  console.log(app(request))
+}
+
 const RouterRegistry = {
   encargos: EncargosRouters
 };
@@ -23,19 +33,42 @@ function app(request) {
 }
 
 function parseQuery(queryString = '') {
-  const params = {};
 
+  const params = {};
   if (!queryString) return params;
 
-  queryString
-    .split('&')
-    .forEach(pair => {
-      const [key, value] = pair.split('=');
+  const operatorRegex = /(>=|<=|!=|=|>|<)/;
 
-      params[key] = decodeURIComponent(
-        (value ?? '').replace(/\+/g, ' ')
-      );
-    });
+  queryString.split('&').forEach(pair => {
+
+    const match = pair.match(operatorRegex);
+    if (!match) return;
+
+    const op = match[0];
+    const [key, rawValue] = pair.split(op);
+
+    const value = decodeURIComponent(
+      (rawValue ?? '').replace(/\+/g, ' ')
+    );
+
+    params[key] = {
+      op,
+      value: coerceValue(value)
+    };
+
+  });
 
   return params;
+}
+
+function coerceValue(value) {
+
+  if (value === 'true') return true;
+  if (value === 'false') return false;
+
+  if (!isNaN(value) && value.trim() !== '') {
+    return Number(value);
+  }
+
+  return value;
 }

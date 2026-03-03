@@ -1,0 +1,275 @@
+<script type="text/babel">
+  
+  const Configuracoes = () => {
+    
+    const [loading, setLoading] = React.useState(true)
+    const [data, setData] = React.useState([]);
+    const [tableConfig, setTableConfig] = React.useState({})
+    const [filterConfig, setFilterConfig] = React.useState([])
+
+    const [screenFilter, setScreenFilter] = React.useState(false)
+    const [search, setSearch] = React.useState("")
+    const [filters, setFilters] = React.useState({})
+
+    const requestIdRef = React.useRef(0)
+
+    // Mapa de função da view
+    const actionHandlers = {
+      edit: (row) =>  {console.log(row._id)},
+      delete: (row) => {} // função async
+    }
+
+    // Função para montar a query da request
+    const getRequest = (searchTerm = "", activeFilters = {}) => {
+
+      const query = new URLSearchParams({
+        search: searchTerm || "",
+        ...activeFilters
+      }).toString();
+
+      return query ? `encargos?${query}` : "encargos"
+      
+    }
+
+    React.useEffect(() => {
+
+      const requestId = ++requestIdRef.current
+      const getData = async (req) => {
+        
+        // Proteção contra race condition
+        if (requestId !== requestIdRef.current) return
+
+        const res = await googleFatch(req).GET()
+        const { data, tableConfig, filterConfig } = res.response
+
+        if(loading) {
+          setTableConfig(tableConfig)
+          setFilterConfig(filterConfig)
+        }
+
+        setData(data)
+        setLoading(false)
+
+      }
+
+      if(loading) {
+        
+        // Carregamento inicial
+        getData(getRequest())
+
+      } else {
+
+        // Filtros
+        const delay = setTimeout(() => {
+          getData(getRequest(search, filters))
+        }, 400)
+
+      }
+
+    }, [search, filters])
+
+    return (
+      <>
+        <div className="conteiner-titulo-pag">
+          <div id="conteiner-title-pag">
+            <h1>Configurações</h1>
+            <p>Ajuste preferências, integrações e parâmetros do sistema</p>
+          </div>
+          
+          <div id="container-btns-title">
+            <button className="btn-primario btn-title">
+              <i data-lucide="plus"></i>
+              <span>Adicionar Novo Registro</span>
+            </button>
+          </div>
+        </div>
+
+        <div className="conteiner-btn-seguimentacao">
+          <button className="btn-seguimentoRegua ativo">
+            <span>Régua</span>
+          </button>
+
+          <button className="btn-seguimentoRegua">
+            <span>Encargos</span>
+          </button>
+        </div>
+
+        <div className="container-filtros">
+          <div className="busca-avancada">
+            <i data-lucide="search"></i>
+            <input
+              className="input-buscaAvancada"
+              type="search"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Buscar..."
+            />
+          </div>
+
+          <div className="container-select-filtros">
+            <button className="btn-secundario">
+              Filtros
+              <i data-lucide="funnel"></i>
+              <div className="count-filtros" id="count-filtros">0</div>
+            </button>
+
+            <div className="container-filtrado" id="tagsFiltradas"></div>
+          </div>
+        </div>
+        
+        {loading ? (
+          <Loading />
+        ) : (
+          <>
+          <Table
+            tableConfig={tableConfig}
+            data={data}
+            actionHandlers={actionHandlers}
+          />
+
+          <Filtro config={filterConfig} />
+          </>
+        )}
+
+
+
+      </>
+    );
+  }
+</script>
+
+<style>
+  .btn-title{
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .btn-title span {
+    font-size: 12px;
+  }
+
+  .btn-title svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .conteiner-btn-seguimentacao {
+    border-bottom: 1px solid #cccc;
+    padding-top: 25px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+
+  .conteiner-btn-seguimentacao button {
+    background: none;
+    border: none;
+    border-bottom: 3px solid transparent;
+    padding: 5px 24px;
+    cursor: pointer;
+  }
+
+  .conteiner-btn-seguimentacao button.ativo {
+    border-bottom: 3px solid var(--cor-verde-padrao);
+  }
+
+  .conteiner-btn-seguimentacao button.ativo span {
+    color: var(--cor-verde-padrao);
+  }
+
+  .conteiner-btn-seguimentacao button span {
+    font-weight: 600;
+    color: #626262;
+    display: inline-block;
+    transition: transform 0.25s ease, color 0.25s ease;
+  }
+
+  .conteiner-btn-seguimentacao button:hover span {
+    transform: translateY(-4px);
+    color: var(--cor-verde-padrao);
+  }
+
+  .conteiner-btn-seguimentacao button:hover {
+    border-bottom-color: var(--cor-verde-padrao);
+  }
+
+  .container-filtros {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+
+  .busca-avancada {
+    position: relative;
+    width: 250px;
+  }
+
+  .busca-avancada input {
+    padding: 8px 12px 8px 36px;
+  } 
+
+  .busca-avancada svg {
+    position: absolute;
+    top: 14px;
+    transform: translateY(-25%);
+    left: 10px;
+    color: #626262;
+    width: 18px;
+    height: 18px;
+    pointer-events: none;
+  }
+
+  .container-select-filtros {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .container-select-filtros .btn-secundario {
+    width: fit-content;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 18px;
+    border-radius: 50px;
+  }
+
+  .container-select-filtros .btn-secundario svg {
+    width: 18px;
+    height: 18px;
+    pointer-events: none;
+  }
+
+  .count-filtros {
+    background-color: var(--cor-navebar);
+    color: white;
+    width: fit-content;
+    height: fit-content;
+    font-size: 8px;
+    padding: 2px 5px;
+    border-radius: 10px;
+  }
+  
+  .container-filtrado {
+    display: flex;
+    gap: 10px;
+  }
+
+  .filtrado {
+    background-color: var(--cor-navebar);
+    padding: 5px 18px;
+    border-radius: 50px;
+    color: white;
+    text-transform: lowercase;
+    text-transform: capitalize;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+  }
+
+</style>

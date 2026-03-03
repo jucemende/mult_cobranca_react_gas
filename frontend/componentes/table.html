@@ -1,0 +1,289 @@
+<script type="text/babel">
+
+  const { useEffect } = React
+
+  const Table = ({ tableConfig = {}, data = [], actionHandlers = {} }) => {
+    
+    const { headers = [], actions = [], domain } = tableConfig
+
+    useEffect(() => {
+      if (window.lucide) {
+        window.lucide.createIcons();
+      }
+    }, [data, tableConfig]);
+
+    return (
+      <div className="container-tabela">
+        <table className="tabela-padrao">
+          <thead>
+            <tr>
+              {headers.map(col => (
+                <th key={col.key}>{col.label}</th>
+              ))}
+              {actions.length > 0 && <th></th>}
+            </tr>
+          </thead>
+
+          <tbody>
+            {data.length === 0 && (
+              <tr>
+                <td colSpan={headers.length+1} style={{ textAlign: "center" }}>
+                  Nenhum registro encontrado
+                </td>
+              </tr>
+            )}
+
+            {data.map((row, index) => (
+              <tr key={index}>
+                {headers.map(col => {
+                  const rawValue = row[col.key];
+
+                  if (col.style) {
+                    const tag = col.style.find(t => t.value === rawValue);
+
+                    return (
+                      <td key={col.key}>
+                        <span className={tag ? `tag ${tag.className}` : ""}>
+                          {rawValue}
+                        </span>
+                      </td>
+                    );
+                  }
+
+                  return (
+                    <td key={col.key}>
+                      {rawValue}
+                    </td>
+                  );
+                })}
+                {actions.length > 0 && (
+                  <td>
+                    <div className="container-acoes">
+                      {actions.map(action =>(
+                        <button
+                          title={action.title}
+                          className="table-action-btn"
+                          key={action.type}
+                          onClick={() => actionHandlers[action.type]?.(row)}
+                        >
+                          <i data-lucide={action.icon}></i>
+                        </button>
+                      ))}
+                    </div>
+                  </td>
+                )}
+
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    );
+  };
+</script>
+
+<style>
+  .container-tabela {
+    width: 100%;
+    padding-bottom: 10px;
+    overflow-x: auto;
+    overflow-y: hidden;
+  }
+
+  .conteiner-tabela-padrao {
+    width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+  }
+
+  .tabela-padrao {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: auto;
+  }
+
+  .tabela-padrao thead th {
+    position: sticky;
+    background-color: white;
+  }
+
+  .tabela-padrao th {
+    font-weight: 500;
+    border-bottom: solid 2px var(--cor-verde-padrao);
+  }
+
+  .tabela-padrao th,
+  .tabela-padrao td {
+    padding: 8px;
+    text-align: left;
+    white-space: nowrap;
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .tabela-padrao tr:nth-child(even) {
+    background-color: var(--cor-fundo);
+  }
+
+  .tabela-padrao tbody tr {
+    transition: 0.3s
+  }
+
+  .tabela-padrao tbody tr:hover {
+    background-color: var(--cor-roverTable);
+  }
+
+  .tabela-padrao .container-acoes {
+    display: flex;
+    gap: 5px;
+    justify-content: flex-end;
+  }
+
+  .tabela-padrao button {
+    width: 25px;
+    height: 25px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background-color 0.2s, color 0.2s;
+  }
+
+  .tabela-padrao svg {
+    stroke-width: 2;
+    color: #626262;
+    width: 18px;
+    height: 18px;
+  }
+
+  .tabela-padrao button:hover {
+    background-color: var(--cor-verde-padrao);
+  }
+
+  .tabela-padrao button:hover svg {
+    color: white;
+    stroke-width: 2;
+  }
+
+  .tag {
+    font-size: 11px;
+    font-weight: 500;
+    padding: 3px 16px;
+    border-radius: 10px;
+    letter-spacing: 2px;
+  }
+
+  .color-red {
+    background-color: var(--cor-vermelho);
+  }
+
+  .color-green {
+    background-color: var(--cor-verde);
+  }
+
+  .color-yellow {
+    background-color: var(--cor-amarelo);
+  }
+
+  .color-gray {
+    background-color: #cccc;
+  }
+
+  /* Estilização para a paginação */
+  .container-paginacao {
+    border-top: 1px solid #ccc;
+    border-bottom: 1px solid #ccc;
+    height: 40px;
+    width: 100%;
+    padding: 0px 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+
+  .records-view {
+    padding: 3px 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+  }
+
+  .records-total {
+    color: #626262;
+  }
+
+  .container-status {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .container-paginacao-nav {
+    display: flex;
+    gap: 5px;
+    justify-content: center;
+  }
+
+  .container-paginacao-nav button {
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    background-color: #fff;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background-color 0.2s, color 0.2s;
+  }
+
+  .container-paginacao-nav button:hover:not(:disabled) {
+    background-color: var(--cor-fundo);
+  }
+
+  .container-paginacao-nav button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .lucide-circle-check-big {
+    color: var(--cor-verde) !important;
+    width: 100% !important;
+    stroke-width: 2.75px !important;
+  }
+
+  .lucide-circle-x {
+    color: var(--cor-vermelho) !important;
+    width: 100% !important;
+    stroke-width: 2.75px !important;
+  }
+
+  /* Estilização para os totais de tabela */
+  .totais-container {
+    margin: 15px auto;
+    display: flex;
+    padding: 10px 0;
+    width: fit-content;
+    border: solid 1px var(--cor-verde-padrao);
+    border-radius: 8px;
+    background-color: var(--cor-roverTable);
+    color: var(--cor-verde-padrao);
+  }
+
+  .totais-container div {
+    padding: 0 30px;
+    border-left: 1px solid var(--cor-verde-padrao);
+  }
+
+  .totais-container div:first-child {
+    border-left: none;
+  }
+
+  .caption {
+    font-weight: 500;
+  }
+</style>

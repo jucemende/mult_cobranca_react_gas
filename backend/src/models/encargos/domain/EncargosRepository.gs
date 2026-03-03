@@ -5,15 +5,23 @@
  */
 class EncargosRepository {
 
-  select( params ) {
-    throw new Error('Método findAll() não implementado');
+  getAll( params ) {
+    throw new Error('Método getAll() não implementado');
   }
 
-  selectById(id, params) {
+  getById(id, params) {
     throw new Error('Método findById() não implementado');
   }
 
-  create(encargo) {
+  applyAdvancedSearch( rows, search ) {
+    throw new Error('Método findByAdvancedSearch() não implementado');
+  }
+
+  applyFilters( rows, filters ) {
+    throw new Error('Método findByFilters() não implementado');
+  }
+
+  insert(encargo) {
     throw new Error('Método save() não implementado');
   }
 

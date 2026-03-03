@@ -65,15 +65,10 @@ class SQSheets {
     return data;
   }
 
-  getAll() {
-    return this.load();
-  }
+  select() {
 
-  getById(id) {
-    const data = this.load();
-    return data.find(r =>
-      String(r[this.idField]) === String(id)
-    ) || null;
+    return this.load()
+
   }
 
   insert(row) {

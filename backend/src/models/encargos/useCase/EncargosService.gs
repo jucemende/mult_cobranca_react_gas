@@ -4,13 +4,27 @@ class EncargosService {
     this.repository = encargosRepository;
   }
 
-  select() {
-    return this.repository.select();
+  getAll( params = {} ) {
+    
+    const search = params.search
+
+    let rows = this.repository.getAll();
+    
+    if (search) {
+      rows = this.repository.applyAdvancedSearch(rows, search.value);
+    }
+
+    if (Object.keys(params).length > 0) {
+      rows = this.repository.applyFilters(rows, params);
+    }
+
+    return rows;
+    
   }
 
-  selectById(id) {
+  getById( id ) {
     if (!id) throw new Error('ID é obrigatório');
-    return this.repository.selectById(id);
+    return this.repository.getById(id);
   }
 
   create(data) {
@@ -32,7 +46,7 @@ class EncargosService {
       throw new Error('Encargo duplicado');
     }
 
-    return this.repository.create(encargo);
+    return this.repository.insert(encargo);
   }
 
   update(id, data) {

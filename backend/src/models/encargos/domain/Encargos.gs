@@ -1,3 +1,21 @@
+function getEnumsEncargos() {
+  return {
+    tipoCobranca: {
+      JUROS: 'JUROS',
+      MULTA: 'MULTA'
+    },
+    aplicacao: {
+      ATRASO: 'ATRASO',
+      PARCELAMENTO: 'PARCELAMENTO'
+    },
+    recorrencia: {
+      DIARIA: 'DIARIA',
+      MENSAL: 'MENSAL',
+      UNICA: 'UNICA'
+    }
+  }
+}
+
 class Encargo {
 
   constructor({
@@ -58,24 +76,24 @@ class Encargo {
   }
 
   _validarTipo(valor) {
-    const permitidos = ['JUROS', 'MULTA'];
-    if (!permitidos.includes(valor)) {
+    const { tipoCobranca } = getEnumsEncargos()
+    if (!tipoCobranca[valor]) {
       throw new Error(`Tipo de cobrança inválido: ${valor}`);
     }
     return valor;
   }
 
   _validarAplicacao(valor) {
-    const permitidos = ['ATRASO', 'PARCELAMENTO'];
-    if (!permitidos.includes(valor)) {
+    const { aplicacao } = getEnumsEncargos();
+    if (!aplicacao[valor]) {
       throw new Error(`Aplicação inválida: ${valor}`);
     }
     return valor;
   }
 
   _validarRecorrencia(valor) {
-    const permitidos = ['DIARIA', 'MENSAL', 'UNICA'];
-    if (!permitidos.includes(valor)) {
+    const { recorrencia } = getEnumsEncargos()
+    if (!recorrencia[valor]) {
       throw new Error(`Recorrência inválida: ${valor}`);
     }
     return valor;
