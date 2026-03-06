@@ -22,7 +22,7 @@ class EncargosRepository {
   }
 
   insert(encargo) {
-    throw new Error('Método save() não implementado');
+    throw new Error('Método insert() não implementado');
   }
 
   update(encargo) {

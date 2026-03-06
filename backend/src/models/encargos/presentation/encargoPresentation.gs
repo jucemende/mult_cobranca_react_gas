@@ -1,6 +1,6 @@
 function getConfigEncargo() {
   
-  const { tipoCobranca, aplicacao, recorrencia } = getEnumsEncargos()
+  const { tipoCobranca, aplicacao, recorrencia } = getEnunsEncargos()
   
   const enuns = {
     tipos: [

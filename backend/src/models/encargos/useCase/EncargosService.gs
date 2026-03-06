@@ -9,7 +9,7 @@ class EncargosService {
     const search = params.search
 
     let rows = this.repository.getAll();
-    
+  
     if (search) {
       rows = this.repository.applyAdvancedSearch(rows, search.value);
     }

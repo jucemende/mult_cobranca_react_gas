@@ -1,4 +1,4 @@
-function getEnumsEncargos() {
+function getEnunsEncargos() {
   return {
     tipoCobranca: {
       JUROS: 'JUROS',
@@ -76,7 +76,7 @@ class Encargo {
   }
 
   _validarTipo(valor) {
-    const { tipoCobranca } = getEnumsEncargos()
+    const { tipoCobranca } = getEnunsEncargos()
     if (!tipoCobranca[valor]) {
       throw new Error(`Tipo de cobrança inválido: ${valor}`);
     }
@@ -84,7 +84,7 @@ class Encargo {
   }
 
   _validarAplicacao(valor) {
-    const { aplicacao } = getEnumsEncargos();
+    const { aplicacao } = getEnunsEncargos();
     if (!aplicacao[valor]) {
       throw new Error(`Aplicação inválida: ${valor}`);
     }
@@ -92,7 +92,7 @@ class Encargo {
   }
 
   _validarRecorrencia(valor) {
-    const { recorrencia } = getEnumsEncargos()
+    const { recorrencia } = getEnunsEncargos()
     if (!recorrencia[valor]) {
       throw new Error(`Recorrência inválida: ${valor}`);
     }
