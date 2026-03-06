@@ -1,4 +1,4 @@
-function TestRegua() {
+function TestDomainRegua() {
 
   const dadosCriacao = {
     id: null,
@@ -39,7 +39,7 @@ function getEnunsRegua() {
     faseRegua: {
       PREVENTIVA: 'PREVENTIVA',
       LEVE: 'LEVE',
-      MEDIA: 'MEDIA',
+      MEDIA: 'MÉDIA',
       ALTA: 'ALTA',
       CRITICA: 'CRÍTICA'
     }

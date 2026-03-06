@@ -1,16 +1,16 @@
 /**
- * Interface conceitual do repositório de Encargos.
+ * Interface conceitual do repositório de Regua.
  * Implementações concretas (Sheets, Firestore, etc.)
  * devem seguir este contrato.
  */
-class EncargosRepository {
+class ReguaRepository {
 
   getAll( params ) {
     throw new Error('Método getAll() não implementado');
   }
 
   getById(id, params) {
-    throw new Error('Método findById() não implementado');
+    throw new Error('Método getById() não implementado');
   }
 
   applyAdvancedSearch( rows, search ) {
@@ -33,7 +33,7 @@ class EncargosRepository {
     throw new Error('Método delete() não implementado');
   }
 
-  validateDuplicate(tipoCobranca, aplicacao, recorrencia, ignoreId = null) {
+  validateDuplicate(inicio, fim, ignoreId = null) {
     throw new Error('Método validateDuplicate() não implementado');
   }
 }

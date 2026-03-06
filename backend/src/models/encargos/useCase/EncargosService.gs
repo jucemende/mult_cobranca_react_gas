@@ -53,7 +53,7 @@ class EncargosService {
 
     if (!id) throw new Error('ID é obrigatório');
 
-    const existente = this.repository.selectById(id);
+    const existente = this.repository.getById(id);
     if (!existente) throw new Error('Registro não encontrado')
 
     const encargo = new Encargo({

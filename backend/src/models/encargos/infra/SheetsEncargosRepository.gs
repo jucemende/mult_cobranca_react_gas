@@ -97,8 +97,8 @@ class SheetsEncargosRepository extends EncargosRepository {
   }
 
   validateDuplicate(tipoCobranca, aplicacao, recorrencia, ignoreId = null) {
-
-    return this.db.getAll().some(row =>
+    
+    return this.db.select().some(row =>
       row.tipo_cobranca === tipoCobranca &&
       row.aplicacao === aplicacao &&
       row.recorrencia === recorrencia &&
