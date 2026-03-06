@@ -1,6 +1,15 @@
 function TesteApp() {
+  
+  const dados = {
+    id: null,
+    vendedor: 'Julio',
+    email: 'email@teste.com',
+  }
+
   const request ={
-    url: 'regua?atrasoDe>0&atrasoAte<=30'
+    method: 'DELETE',
+    url: 'vendedor/3e84d938-3a01-4d8f-9eaa-05f177ef1651',
+    //body: dados
   }
 
   console.log(request)
@@ -10,7 +19,8 @@ function TesteApp() {
 
 const RouterRegistry = {
   encargos: EncargosRouters,
-  regua: ReguaRouters
+  regua: ReguaRouters,
+  vendedor: VendedorRouters
 };
 
 function app(request) {

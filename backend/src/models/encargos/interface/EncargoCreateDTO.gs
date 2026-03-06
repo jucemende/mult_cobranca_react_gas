@@ -6,7 +6,6 @@ class EncargosDTO extends BaseDTO {
     aplicacao,
     recorrencia,
     criadoEm,
-    
   } = {}) {
 
     super()
@@ -15,7 +14,7 @@ class EncargosDTO extends BaseDTO {
     this.tipoCobranca = this._isString(tipoCobranca, 'Tipo de Cobrança')
     this.aplicacao = this._isString(aplicacao, "Aplicação")
     this.recorrencia = this._isString(recorrencia, "Recorrência")
-    this.criadoEm = this._isISODate(criadoEm, 'Criado, em', false)
+    this.criadoEm = this._isISODate(criadoEm, 'Criado em', false)
 
   }
 }

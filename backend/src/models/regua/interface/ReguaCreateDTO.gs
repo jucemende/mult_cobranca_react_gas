@@ -1,7 +1,6 @@
 class ReguaDTO extends BaseDTO {
 
   constructor({
-    id_regua = null,
     fase_regua,
     titulo,
     atraso_de,
@@ -14,7 +13,6 @@ class ReguaDTO extends BaseDTO {
 
     super()
 
-    this.id_regua = id_regua;
     this.fase_regua = this._isString(fase_regua, 'Nome')
     this.titulo = titulo
     this.atraso_de = this._isNumber(atraso_de, "Atraso de")
