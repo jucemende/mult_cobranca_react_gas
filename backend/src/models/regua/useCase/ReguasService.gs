@@ -24,8 +24,8 @@ function TestReguaService() {
 
 class ReguaService {
 
-  constructor({ reguasRepository }) {
-    this.repository = reguasRepository;
+  constructor({ reguaRepository }) {
+    this.repository = reguaRepository;
   }
 
   getAll( params = {} ) {

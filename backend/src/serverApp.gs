@@ -1,6 +1,6 @@
 function TesteApp() {
   const request ={
-    url: 'encargos'
+    url: 'regua?atrasoDe>0&atrasoAte<=30'
   }
 
   console.log(request)
@@ -9,7 +9,8 @@ function TesteApp() {
 }
 
 const RouterRegistry = {
-  encargos: EncargosRouters
+  encargos: EncargosRouters,
+  regua: ReguaRouters
 };
 
 function app(request) {
