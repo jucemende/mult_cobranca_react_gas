@@ -14,8 +14,8 @@ function TestDomainVendedor() {
 function schemaDomainVendedor(){
   return {
     id: null,
-    vendedor: String,
-    email: String,
+    vendedor: undefined,
+    email: undefined,
     criadoEm: null
   }
 }

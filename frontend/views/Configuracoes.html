@@ -15,8 +15,8 @@
 
     // Mapa de função da view
     const actionHandlers = {
-      edit: (row) =>  {console.log(row._id)},
-      delete: (row) => {} // função async
+      edit: (row) =>  {alert(`Editando ${row._id}`)},
+      delete: (row) => {alert(`Deletando ${row._id}`)} // função async
     }
 
     // Função para montar a query da request
@@ -127,7 +127,6 @@
             actionHandlers={actionHandlers}
           />
 
-          <Filtro config={filterConfig} />
           </>
         )}
 
