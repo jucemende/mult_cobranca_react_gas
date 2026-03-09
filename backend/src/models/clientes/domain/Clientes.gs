@@ -36,7 +36,6 @@ function TestDomainCliente() {
 
 }
 
-
 function getEnunsClientes() {
   return {
     statusCliente: {
@@ -174,7 +173,7 @@ class Cliente {
     const permissao = Boolean(valor)
 
     if (typeof valor !== 'boolean') {
-      throw new Error("O campo permiteNotificacao deve ser um booleano (true ou false).");
+      throw new Error(`O campo permiteNotificacao deve ser um booleano (true ou false)`);
     }
     
     const { statusCliente } = getEnunsClientes()

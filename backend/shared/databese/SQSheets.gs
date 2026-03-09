@@ -33,37 +33,48 @@ class SQSheets {
   }
 
   load() {
-    const cache = CacheService.getScriptCache();
-    const cached = cache.get(this.tableName);
+      const cache = CacheService.getScriptCache();
+      const cached = cache.get(this.tableName);
 
-    if (cached) {
-      return JSON.parse(cached);
-    }
+      if (cached) {
+          const { headers, rows } = JSON.parse(cached);
+          return rows.map((row, index) => {
+              const obj = {};
+              headers.forEach((h, i) => {
+                  obj[h] = row[i];
+              });
+              obj.__rowNumber = index + 2;
+              return obj;
+          });
+      }
 
-    const sh = this.getSheet();
-    const values = sh.getDataRange().getValues();
+      const sh = this.getSheet();
+      const values = sh.getDataRange().getValues();
+      if (values.length < 2) return [];
 
-    if (values.length < 2) return [];
+      const [headers, ...rows] = values;
 
-    const [headers, ...rows] = values;
+      // Normaliza datas para string antes de cachear
+      const cleanRows = rows.map(row => 
+          row.map(cell => (cell instanceof Date ? cell.toISOString() : cell === "" ? null : cell))
+      );
 
-    const data = rows.map((row, index) => {
-      const obj = {};
-      headers.forEach((h, i) => {
-        let value = row[i];
-        if (value === "") value = null;
-        if (value instanceof Date) value = value.toISOString();
-        obj[h] = value;
+      // Salva apenas o essencial: cabeçalho e linhas puras
+      const cachePayload = JSON.stringify({ headers, rows: cleanRows });
+      
+      if (cachePayload.length < 100000) {
+          cache.put(this.tableName, cachePayload, 300);
+      }
+
+      // Retorna o objeto formatado como antes
+      return cleanRows.map((row, index) => {
+          const obj = {};
+          headers.forEach((h, i) => obj[h] = row[i]);
+          obj.__rowNumber = index + 2;
+          return obj;
       });
-
-      obj.__rowNumber = index + 2;
-      return obj;
-    });
-
-    cache.put(this.tableName, JSON.stringify(data), 300);
-
-    return data;
   }
+
 
   select() {
 
