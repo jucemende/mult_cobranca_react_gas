@@ -35,9 +35,9 @@ class SheetsEncargosRepository extends EncargosRepository {
 
   applyAdvancedSearch(rows = [], value = '') {
     const searchableFields = [
-      'tipoCobranca',
-      'aplicacao',
-      'recorrencia'
+      '_tipoCobranca',
+      '_aplicacao',
+      '_recorrencia'
     ];
 
     const normalized = value.toUpperCase();
@@ -54,10 +54,10 @@ class SheetsEncargosRepository extends EncargosRepository {
   applyFilters(rows = [], params = {}) {
 
     const fieldMap = {
-      taxaJuros: row => row.taxaJuros,
-      tipoCobranca: row => row.tipoCobranca,
-      aplicacao: row => row.aplicacao,
-      recorrencia: row => row.recorrencia
+      taxaJuros: row => row._taxaJuros,
+      tipoCobranca: row => row._tipoCobranca,
+      aplicacao: row => row._plicacao,
+      recorrencia: row => row._recorrencia
     };
 
     const filters = buildFilters(params, fieldMap);
@@ -99,9 +99,9 @@ class SheetsEncargosRepository extends EncargosRepository {
   validateDuplicate(tipoCobranca, aplicacao, recorrencia, ignoreId = null) {
     
     return this.db.select().some(row =>
-      row.tipo_cobranca === tipoCobranca &&
-      row.aplicacao === aplicacao &&
-      row.recorrencia === recorrencia &&
+      row._tipo_cobranca === tipoCobranca &&
+      row._aplicacao === aplicacao &&
+      row._recorrencia === recorrencia &&
       String(row.id) !== String(ignoreId)
     );
   }

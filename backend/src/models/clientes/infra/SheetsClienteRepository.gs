@@ -1,27 +1,27 @@
 function TestClienteRepository() {
   
-  const dadosCriacao = {
-    id: 'ab-add',
-    cod: 1234,
-    idVendedor: 4567,
-    cliente: 'JULIO CESAR',
-    tipo: 'CNPJ',
-    cnpjCpf: '12.123.123/1234-12',
-    telefone: '62 99240-9051',
-    email: 'email@teste.com',
-    status: 'CANCELADO',
-    permiteNotificacao: true,
-    obs: 'Obs teste',
-    criadoEm: '2026-01-12T03:00:00.000Z'
+  const boot = bootstrapCliente().vendedores()
+  //const vendedor = bootstrapRepoCliente().vendedor
+  const clientes = new SheetsClienteRepository().getAll()// getById('424a')
+
+  console.log(clientes)
+
+}
+
+function bootstrapCliente() {
+
+  const vendedores = () => {
+    let listVendores = new SheetsVendedorRepository().getAll()
+
+    return Object.fromEntries(
+      listVendores.map(v => [v.id, v])
+    )  
   }
 
-  const repository = new SheetsClienteRepository()
+  return {
+    vendedores
+  }
 
-  const existe = repository.validateDuplicate('12343', '12.123.123/1234-13', 'ab-adds').existsCpfCnpj()
-  
-  //const filtrado = repository.applyFilters(listClientes, {cliente: 'JULIO CESAR'})
-
-  console.log(existe)
 }
 
 class SheetsClienteRepository extends ClienteRepository {
@@ -32,11 +32,20 @@ class SheetsClienteRepository extends ClienteRepository {
       tableName: 'bdClientes',
       idField: 'id'
     });
+    this._vendedores = bootstrapCliente().vendedores
   }
 
   getAll() {
+    
+    const vendedores = this._vendedores()
+
     return this.db.select()
-      .map(row => this._toEntity(row));
+      .map(row => {
+        const cliente = this._toEntity(row)
+        cliente.vendedor = vendedores[cliente.idVendedor]?.vendedor ?? null
+        return cliente
+      });
+
   }
 
   getById(id) {
@@ -45,7 +54,12 @@ class SheetsClienteRepository extends ClienteRepository {
       String(r.id) === String(id)
     ) || null;
 
-    return row ? this._toEntity(row) : null;
+    const cliente = row ? this._toEntity(row) : null;
+    
+    const vendedores = this._vendedores()
+    cliente.vendedor = vendedores[cliente.idVendedor]?.vendedor ?? null
+
+    return cliente
 
   }
 
@@ -53,8 +67,9 @@ class SheetsClienteRepository extends ClienteRepository {
     const searchableFields = [
       'cod',
       'cliente',
-      'tipo',
-      'cnpjCpf',
+      '_vendedor',
+      '_tipo',
+      '_cnpjCpf',
       'telefone',
       'email',
     ];
@@ -68,6 +83,7 @@ class SheetsClienteRepository extends ClienteRepository {
           .includes(normalized)
       )
     );
+
   }
 
   applyFilters(rows = [], params = {}) {
@@ -76,12 +92,13 @@ class SheetsClienteRepository extends ClienteRepository {
 
       cod: row => row.cod,
       cliente: row => row.cliente,
-      tipo: row => row.tipo,
-      cnpjCpf: row => row.cnpjCpf,
+      vendedor: row => row._vendedor,
+      tipo: row => row._tipo,
+      cnpjCpf: row => row._cnpjCpf,
       telefone: row => row.telefone,
       email: row => row.email,
-      status: row => row.status,
-      permiteNotificacao: row => row.permiteNotificacao,
+      status: row => row._status,
+      permiteNotificacao: row => row._permiteNotificacao,
       obs: row => row.obs
 
     };
@@ -97,7 +114,7 @@ class SheetsClienteRepository extends ClienteRepository {
         const operatorFn = getOperator(op);
         return operatorFn(accessor(row), value);
       })
-    );
+    )
     
   }
 
@@ -118,21 +135,21 @@ class SheetsClienteRepository extends ClienteRepository {
 
   }
 
-  validateDuplicate(codigo, cnpjCpf, ignoreId = null) {
+  validateDuplicate(ignoreId = null) {
 
     // Valida a dupliccidade do codigo
-    const existsCod = () => {
+    const existsCod = (codigo) => {
       return this.db.select().some(row =>
-        row.cod == codigo &&
+        String(row.cod) == String(codigo) &&
         String(row.id) !== String(ignoreId)
       );
     }
 
-    const existsCpfCnpj = () => {
-      return this.db.select().some(row =>
-        row.cnpj_cpf === cnpjCpf &&
+    const existsCpfCnpj = (cnpjCpf) => {
+      return this.db.select().some(row => 
+        String(row.cnpj_cpf) === String(cnpjCpf) &&
         String(row.id) !== String(ignoreId)
-      );
+      )
     }
 
     return {
@@ -176,4 +193,5 @@ class SheetsClienteRepository extends ClienteRepository {
       criado_em: cliente.criadoEm,
     };
   }
+
 }

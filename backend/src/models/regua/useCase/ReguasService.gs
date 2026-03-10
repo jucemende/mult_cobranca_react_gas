@@ -13,7 +13,7 @@ function TestReguaService() {
   }
 
   const service = new ReguaService({
-    reguasRepository: new SheetsReguaRepository()
+    reguaRepository: new SheetsReguaRepository()
   })
 
   const data = service.create(dadosCriacao)

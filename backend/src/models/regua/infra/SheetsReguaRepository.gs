@@ -47,7 +47,7 @@ class SheetsReguaRepository extends ReguaRepository {
 
   applyAdvancedSearch(rows = [], value = '') {
     const searchableFields = [
-      'faseRegua',
+      '_faseRegua',
       'titulo',
       'acoesRegua',
       'mensagemPadrao'
@@ -68,12 +68,12 @@ class SheetsReguaRepository extends ReguaRepository {
 
     const fieldMap = {
 
-      faseRegua: row => row.faseRegua,
+      faseRegua: row => row._faseRegua,
       titulo: row => row.titulo,
-      atrasoDe:row => row.atrasoDe,
-      atrasoAte: row => row.atrasoAte,
+      atrasoDe:row => row._atrasoDe,
+      atrasoAte: row => row._atrasoAte,
       acoesRegua: row => row.acoesRegua,
-      permiteBloqueio: row => row.permiteBloqueio,
+      permiteBloqueio: row => row._permiteBloqueio,
       mensagemPadrao: row => row.mensagemPadrao,
 
     };
@@ -118,8 +118,8 @@ class SheetsReguaRepository extends ReguaRepository {
 
     return this.db.select().some(row =>
       
-      row.atraso_de <= fim &&
-      row.atraso_ate >= inicio &&
+      row._atraso_de <= fim &&
+      row._atraso_ate >= inicio &&
       String(row.id) !== String(ignoreId)
 
     );

@@ -1,26 +1,20 @@
 function TesteApp() {
   
-  const dados = {
-    id: null,
-    vendedor: 'Julio',
-    email: 'email@teste.com',
-  }
-
   const request ={
-    method: 'DELETE',
-    url: 'vendedor/3e84d938-3a01-4d8f-9eaa-05f177ef1651',
-    //body: dados
+    url: 'cliente?search=ANTONIO&status=SUSPENSO&vendedor=JOSE CARLOS MIGUEL'
   }
+  
+  const res = app(request)
 
-  console.log(request)
+  console.log(res)
 
-  console.log(app(request))
 }
 
 const RouterRegistry = {
   encargos: EncargosRouters,
   regua: ReguaRouters,
-  vendedor: VendedorRouters
+  vendedor: VendedorRouters,
+  cliente: ClienteRouters
 };
 
 function app(request) {

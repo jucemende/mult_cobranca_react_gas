@@ -56,6 +56,7 @@ function schemaDomainCliente(){
     id: null,
     cod: undefined,
     idVendedor: null,
+    vendedor: null,
     cliente: undefined,
     tipo: null,
     cnpjCpf: null,
@@ -81,9 +82,10 @@ class Cliente {
     this._id = props.id
     this.cod = props.cod
     this.idVendedor = props.idVendedor
+    this._vendedor = props.vendedor
     this.cliente = props.cliente
     this._tipo = this._validarTipo(props.tipo)
-    this.cnpjCpf = this._validarCnpjCPF(props.cnpjCpf)
+    this._cnpjCpf = this._validarCnpjCPF(props.cnpjCpf)
     this.telefone = props.telefone
     this.email = props.email
     this._status = this._validarStatus(props.status)
@@ -146,26 +148,23 @@ class Cliente {
   }
 
   _validarCnpjCPF(valor) {
+    if (!valor) return null;
+
+    // Extrai apenas os números
+    const documento = valor.toString().replace(/\D/g, '');
     
-    if(!valor) {
-      return null
+    const { tipoPessoa } = getEnunsClientes();
+
+    // Verifica se é CPF (11) ou CNPJ (14) baseado no tipo definido
+    const ehCpfValido = this._tipo === tipoPessoa.CPF && documento.length === 11;
+    const ehCnpjValido = this._tipo === tipoPessoa.CNPJ && documento.length === 14;
+
+    if (ehCpfValido || ehCnpjValido) {
+      return documento;
     }
 
-    // Remove caracteres não numéricos
-    const documento = valor.replace(/[^\d]+/g, '');
-    
-    const { tipoPessoa } = getEnunsClientes()
-
-    // Validação de CPF (11 dígitos)
-    if (this._tipo === tipoPessoa.CPF && documento.length === 11) {
-        return documento;
-    } 
-    // Validação de CNPJ (14 dígitos)
-    else if (this._tipo === tipoPessoa.CNPJ && documento.length === 14) {
-        return documento;
-    }
-
-    throw new Error(`Informe um número ${this._tipo} válido`)
+    // Se chegou aqui, o tamanho está errado para o tipo selecionado
+    throw new Error(`O ${this._tipo} deve conter exatamente ${this._tipo === tipoPessoa.CPF ? '11' : '14'} dígitos.`);
   }
 
   _validaPerimissao(valor) {
@@ -186,11 +185,14 @@ class Cliente {
   }
 
   get id() { return this._id; }
+  get vendedor() { return this._vendedor }
   get tipo() { return this._tipo; }
+  get cnpjCpf() { return this._cnpjCpf; }
   get status() { return this._status; }
   get permiteNotificacao() { return this._permiteNotificacao; }
   get criadoEm() { return this._criadoEm; }
 
   set id(value) { return this._id = value }
+  set vendedor(value) { return this._vendedor = value }
 
 }
