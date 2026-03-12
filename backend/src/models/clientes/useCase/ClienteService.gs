@@ -17,24 +17,30 @@ function TestClienteService() {
     clienteRepository: new SheetsClienteRepository()
   })
 
-  console.log(service.getAll())
+  const cliente = service.getAll()//getById('424a')
+
+  console.log(cliente)
 
 }
 
 class ClienteService {
 
   constructor({ clienteRepository }) {
-    this.repository = clienteRepository;
+    this.repository = clienteRepository
+    this.boots = BootstrapIndex()
   }
 
   getAll( params = {} ) {
     
     const search = params.search
   
-    let rows = this.repository.getAll();
-  
+    const clientes = this.repository.getAll()
+    const vendores = this.boots.vendedores()
+
+    let rows = clientes.map(c => new ClienteListDTO(c, vendores[c.idVendedor]?.vendedor))
+
     if (search) {
-      rows = this.repository.applyAdvancedSearch(rows, search.value);
+      rows = this.repository.applyAdvancedSearch(rows, search[0].value);
     }
 
     if (Object.keys(params).length > 0) {
@@ -47,7 +53,9 @@ class ClienteService {
 
   getById( id ) {
     if (!id) throw new Error('ID é obrigatório');
-    return this.repository.getById(id);
+    const cliente = this.repository.getById(id)
+    const vendedores = this.boots.vendedores()
+    return new ClienteListDTO(cliente, vendedores[cliente.idVendedor]?.vendedor)
   }
 
   create(data) {

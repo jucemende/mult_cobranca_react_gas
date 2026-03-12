@@ -21,11 +21,11 @@ class ReguaRepository {
     throw new Error('Método applyFilters() não implementado');
   }
 
-  insert(encargo) {
+  insert(regua) {
     throw new Error('Método insert() não implementado');
   }
 
-  update(encargo) {
+  update(regua) {
     throw new Error('Método update() não implementado');
   }
 

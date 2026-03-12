@@ -1,4 +1,4 @@
-class ClienteDTO extends BaseDTO {
+class ClienteCreatDTO extends BaseDTO {
 
   constructor({
     id = null,
@@ -30,5 +30,22 @@ class ClienteDTO extends BaseDTO {
     this.obs = obs
     this.criado_em = this._isISODate(criado_em, 'Criado em', false)
 
+  }
+}
+
+class ClienteListDTO {
+  constructor(cliente, vendedor) {
+    this.id = cliente.id
+    this.cliente = cliente.cliente
+    this.cod = cliente.cod
+    this.idVendedor = cliente.idVendedor
+    this.tipo = cliente.tipo
+    this.cnpjCpf = cliente.cnpjCpf
+    this.telefone = cliente.telefone
+    this.email = cliente.email
+    this.status = cliente.status
+    this.permiteNotificacao = cliente.permiteNotificacao
+    this.obs = cliente.obs
+    this.vendedor = vendedor ?? null
   }
 }

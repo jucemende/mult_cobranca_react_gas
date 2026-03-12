@@ -21,11 +21,11 @@ class ClienteRepository {
     throw new Error('Método applyFilters() não implementado');
   }
 
-  insert(encargo) {
+  insert(cliente) {
     throw new Error('Método insert() não implementado');
   }
 
-  update(encargo) {
+  update(cliente) {
     throw new Error('Método update() não implementado');
   }
 

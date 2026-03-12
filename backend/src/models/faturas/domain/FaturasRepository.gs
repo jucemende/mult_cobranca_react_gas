@@ -1,9 +1,9 @@
 /**
- * Interface conceitual do repositório de Vendedor.
+ * Interface conceitual do repositório de Faturas.
  * Implementações concretas (Sheets, Firestore, etc.)
  * devem seguir este contrato.
  */
-class VendedorRepository {
+class FaturasRepository {
 
   getAll( params ) {
     throw new Error('Método getAll() não implementado');
@@ -21,11 +21,11 @@ class VendedorRepository {
     throw new Error('Método applyFilters() não implementado');
   }
 
-  insert(vendedor) {
+  insert(fatura) {
     throw new Error('Método insert() não implementado');
   }
 
-  update(vendedor) {
+  update(fatura) {
     throw new Error('Método update() não implementado');
   }
 
@@ -33,4 +33,7 @@ class VendedorRepository {
     throw new Error('Método delete() não implementado');
   }
 
+  validateDuplicate(inicio, fim, ignoreId = null) {
+    throw new Error('Método validateDuplicate() não implementado');
+  }
 }

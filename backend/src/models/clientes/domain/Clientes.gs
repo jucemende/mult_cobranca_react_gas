@@ -56,7 +56,6 @@ function schemaDomainCliente(){
     id: null,
     cod: undefined,
     idVendedor: null,
-    vendedor: null,
     cliente: undefined,
     tipo: null,
     cnpjCpf: null,
@@ -71,10 +70,10 @@ function schemaDomainCliente(){
 
 class Cliente {
 
-  constructor(propsRegua = {}) {
+  constructor(propsCliente = {}) {
     
     // Valida o schemaDomainCliente
-    const props = Object.assign({}, schemaDomainCliente(), propsRegua);
+    const props = Object.assign({}, schemaDomainCliente(), propsCliente);
     
     // Função para validar os dados preenchidos
     this._validaPreenchimento(props)
@@ -82,7 +81,6 @@ class Cliente {
     this._id = props.id
     this.cod = props.cod
     this.idVendedor = props.idVendedor
-    this._vendedor = props.vendedor
     this.cliente = props.cliente
     this._tipo = this._validarTipo(props.tipo)
     this._cnpjCpf = this._validarCnpjCPF(props.cnpjCpf)
@@ -184,8 +182,11 @@ class Cliente {
 
   }
 
+  _teste(){
+    console.log('fui acionada')
+  }
+
   get id() { return this._id; }
-  get vendedor() { return this._vendedor }
   get tipo() { return this._tipo; }
   get cnpjCpf() { return this._cnpjCpf; }
   get status() { return this._status; }
@@ -193,6 +194,5 @@ class Cliente {
   get criadoEm() { return this._criadoEm; }
 
   set id(value) { return this._id = value }
-  set vendedor(value) { return this._vendedor = value }
-
+  
 }

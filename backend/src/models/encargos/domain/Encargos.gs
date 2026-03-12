@@ -1,3 +1,17 @@
+function testEncargoDomin() {
+
+  const dados = {
+    taxaJuros: 0.02,
+    tipoCobranca: 'JUROS',
+    aplicacao: 'PARCELAMENTO',
+    recorrencia: 'MENSAL'
+  }
+
+  const encargo = Encargo.criar(dados)
+
+  console.log(encargo)
+
+}
 function getEnunsEncargos() {
   return {
     tipoCobranca: {
@@ -44,18 +58,6 @@ class Encargo {
   get recorrencia() { return this._recorrencia; }
   get criadoEm() { return this._criadoEm; }
   
-  isJuros() {
-    return this._tipoCobranca === 'JUROS';
-  }
-
-  isMulta() {
-    return this._tipoCobranca === 'MULTA';
-  }
-
-  isRecorrente() {
-    return this._recorrencia !== 'UNICA';
-  }
-
   atualizar(dados) {
     return new Encargo({
       id: this._id,
@@ -92,11 +94,59 @@ class Encargo {
   }
 
   _validarRecorrencia(valor) {
-    const { recorrencia } = getEnunsEncargos()
+    const { tipoCobranca, aplicacao, recorrencia } = getEnunsEncargos()
+    
     if (!recorrencia[valor]) {
       throw new Error(`Recorrência inválida: ${valor}`);
     }
-    return valor;
+
+    if( this._tipoCobranca === tipoCobranca.MULTA ) {
+      
+      const isAtraso = this._aplicacao === aplicacao.ATRASO;
+      const isUnica = valor === recorrencia.UNICA;
+
+      if (!isAtraso || !isUnica) {
+        throw new Error(
+          `O tipo de cobrança ${tipoCobranca.MULTA} exige aplicação em ` +
+          `${aplicacao.ATRASO} com recorrência ${recorrencia.UNICA}.`
+        )
+      } 
+    }
+
+    if (this._tipoCobranca === tipoCobranca.JUROS) {
+      
+      const isRecorrenciaValida = valor === recorrencia.MENSAL ||
+                                  valor === recorrencia.DIARIA
+      
+      const isParcelamentoMensal = this._aplicacao === aplicacao.PARCELAMENTO && 
+                                   valor === recorrencia.MENSAL;
+                                  
+      const isAtrasoDiario = this._aplicacao === aplicacao.ATRASO && 
+                             valor === recorrencia.DIARIA;
+
+      if (!isRecorrenciaValida) {
+        throw new Error(
+          `O tipo de cobranca ${tipoCobranca.JUROS} só permite recorrência ` +
+          `${recorrencia.MENSAL} ou ${recorrencia.DIARIA}`
+        )
+      }
+      
+      if (!isParcelamentoMensal && this._aplicacao === aplicacao.PARCELAMENTO) {
+        throw new Error(
+          `A aplicação ${aplicacao.PARCELAMENTO} só permite recorrência ${recorrencia.MENSAL}`
+        );
+      }
+        
+      if (!isAtrasoDiario && this._aplicacao === aplicacao.ATRASO) {
+        throw new Error(
+          `A aplicação ${aplicacao.ATRASO} só permite recorrência ${recorrencia.DIARIA}`
+        );
+      }
+
+    }
+
+    return valor
+
   }
 
   toJSON() {

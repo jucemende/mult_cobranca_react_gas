@@ -25,12 +25,12 @@ class ClienteController {
   }
 
   static post({ data }) {
-    const dto = new VendedoresDTO(data);
+    const dto = new ClienteCreatDTO(data);
     return this.service().create(dto);
   }
 
   static put({ id, data }) {
-    const dto = new VendedoresDTO(data);
+    const dto = new ClienteCreatDTO(data);
     return this.service().update(id, dto);
   }
 

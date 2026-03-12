@@ -2,25 +2,9 @@ function TestClienteRepository() {
   
   const boot = bootstrapCliente().vendedores()
   //const vendedor = bootstrapRepoCliente().vendedor
-  const clientes = new SheetsClienteRepository().getAll()// getById('424a')
-
+  const clientes = new SheetsClienteRepository().getById('424a')
+  
   console.log(clientes)
-
-}
-
-function bootstrapCliente() {
-
-  const vendedores = () => {
-    let listVendores = new SheetsVendedorRepository().getAll()
-
-    return Object.fromEntries(
-      listVendores.map(v => [v.id, v])
-    )  
-  }
-
-  return {
-    vendedores
-  }
 
 }
 
@@ -32,19 +16,12 @@ class SheetsClienteRepository extends ClienteRepository {
       tableName: 'bdClientes',
       idField: 'id'
     });
-    this._vendedores = bootstrapCliente().vendedores
   }
 
   getAll() {
     
-    const vendedores = this._vendedores()
-
-    return this.db.select()
-      .map(row => {
-        const cliente = this._toEntity(row)
-        cliente.vendedor = vendedores[cliente.idVendedor]?.vendedor ?? null
-        return cliente
-      });
+    const rows = this.db.select()
+    return rows.map(row => this._toEntity(row));
 
   }
 
@@ -54,22 +31,17 @@ class SheetsClienteRepository extends ClienteRepository {
       String(r.id) === String(id)
     ) || null;
 
-    const cliente = row ? this._toEntity(row) : null;
+    return row ? this._toEntity(row) : null;
     
-    const vendedores = this._vendedores()
-    cliente.vendedor = vendedores[cliente.idVendedor]?.vendedor ?? null
-
-    return cliente
-
   }
 
   applyAdvancedSearch(rows = [], value = '') {
     const searchableFields = [
       'cod',
       'cliente',
-      '_vendedor',
-      '_tipo',
-      '_cnpjCpf',
+      'vendedor',
+      'tipo',
+      'cnpjCpf',
       'telefone',
       'email',
     ];
@@ -92,13 +64,13 @@ class SheetsClienteRepository extends ClienteRepository {
 
       cod: row => row.cod,
       cliente: row => row.cliente,
-      vendedor: row => row._vendedor,
-      tipo: row => row._tipo,
-      cnpjCpf: row => row._cnpjCpf,
+      vendedor: row => row.vendedor,
+      tipo: row => row.tipo,
+      cnpjCpf: row => row.cnpjCpf,
       telefone: row => row.telefone,
       email: row => row.email,
-      status: row => row._status,
-      permiteNotificacao: row => row._permiteNotificacao,
+      status: row => row.status,
+      permiteNotificacao: row => row.permiteNotificacao,
       obs: row => row.obs
 
     };

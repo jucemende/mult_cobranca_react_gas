@@ -1,7 +1,15 @@
 function TesteApp() {
   
+  const data = {
+    documento: 141881,
+    codCliente: 1234,
+    vencimento: '2026/02/31',
+    vlrLiquido: 1500.00,
+    possuiEncargos: true
+  }
+
   const request ={
-    url: 'cliente?search=ANTONIO&status=SUSPENSO&vendedor=JOSE CARLOS MIGUEL'
+    url: 'faturas'
   }
   
   const res = app(request)
@@ -12,9 +20,10 @@ function TesteApp() {
 
 const RouterRegistry = {
   encargos: EncargosRouters,
-  regua: ReguaRouters,
-  vendedor: VendedorRouters,
-  cliente: ClienteRouters
+  reguas: ReguaRouters,
+  vendedors: VendedorRouters,
+  clientes: ClienteRouters,
+  faturas: FaturasRouters
 };
 
 function app(request) {
@@ -38,33 +47,32 @@ function app(request) {
 }
 
 function parseQuery(queryString = '') {
-
-  const params = {};
+  const params = {}; // Aqui cada chave será um Array
   if (!queryString) return params;
 
   const operatorRegex = /(>=|<=|!=|=|>|<)/;
 
   queryString.split('&').forEach(pair => {
-
     const match = pair.match(operatorRegex);
     if (!match) return;
 
     const op = match[0];
     const [key, rawValue] = pair.split(op);
 
-    const value = decodeURIComponent(
-      (rawValue ?? '').replace(/\+/g, ' ')
-    );
+    const value = coerceValue(decodeURIComponent(rawValue.replace(/\+/g, ' ')));
 
-    params[key] = {
-      op,
-      value: coerceValue(value)
-    };
+    // Se a chave ainda não existe, cria um array
+    if (!params[key]) {
+      params[key] = [];
+    }
 
+    // Adiciona a nova condição ao array daquela chave
+    params[key].push({ op, value });
   });
 
   return params;
 }
+
 
 function coerceValue(value) {
 

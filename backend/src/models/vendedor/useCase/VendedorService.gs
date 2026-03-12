@@ -29,7 +29,7 @@ class VendedorService {
     let rows = this.repository.getAll();
   
     if (search) {
-      rows = this.repository.applyAdvancedSearch(rows, search.value);
+      rows = this.repository.applyAdvancedSearch(rows, search[0].value);
     }
 
     if (Object.keys(params).length > 0) {

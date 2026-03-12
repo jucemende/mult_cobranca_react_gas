@@ -24,31 +24,29 @@ function getOperator(op) {
 }
 
 function buildFilters(params = {}, fieldMap = {}) {
-
   return Object.entries(params)
-    .filter(([_, value]) =>
-      value !== undefined &&
-      value !== null &&
-      value !== ''
-    )
-    .map(([key, config]) => {
-
+    .flatMap(([key, configs]) => { // Usamos flatMap para "achatar" múltiplos filtros do mesmo campo
       const accessor = fieldMap[key];
-      if (!accessor) return null;
+      if (!accessor) return [];
 
-      if (typeof config !== 'object') {
+      // Se não for array (caso de valor único), transforma em array para padronizar
+      const conditions = Array.isArray(configs) ? configs : [configs];
+
+      return conditions.map(config => {
+        if (typeof config !== 'object') {
+          return {
+            accessor,
+            op: '=',
+            value: config
+          };
+        }
+
         return {
           accessor,
-          op: '=',
-          value: config
+          op: config.op || '=',
+          value: config.value
         };
-      }
-
-      return {
-        accessor,
-        op: config.op || '=',
-        value: config.value
-      };
+      });
     })
     .filter(Boolean);
 }
