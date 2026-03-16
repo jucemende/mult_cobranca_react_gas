@@ -5,7 +5,7 @@ function TestDomainRegua() {
     faseRegua: 'LEVE',
     titulo: 'Teste',
     atrasoDe: '5',
-    atrasoAte: '10',
+    atrasoAte: '1827',
     acoesRegua: 'WhatsApp',
     permiteBloqueio: false,
     mensagemPadrao: 'Mensagem',
@@ -24,13 +24,9 @@ function TestDomainRegua() {
   }
 
   const meuTeste = Regua.criar(dadosCriacao)
-  
-  meuTeste.id = '1234'
+
+
   console.log(meuTeste)
-
-  const meuTesteNovo = meuTeste.upDates(dados2)
-
-  console.log(meuTesteNovo)
 
 }
 
@@ -126,6 +122,10 @@ class Regua {
     if(numero < this._atrasoDe) {
         throw new Error('O fim do intervalo da régua deve ser maior que o inicio')
     }
+
+    if(numero > 1826) { // 5 anos
+      throw new Error(`razo limite excedido. O atraso de ${numero} dias ultrapassa o teto legal de 5 anos para cobrança.`)
+    } 
 
     return numero
   }

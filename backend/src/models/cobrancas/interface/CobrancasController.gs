@@ -1,9 +1,30 @@
+function testControllerCobrancas() {
+  const controller = new CobrancasController()
+  const reguas = controller._usesCases().reguaUseCase.getAll()
+
+  const { min, max } = reguas.reduce((acc, r) => ({
+    min: Math.min(acc.min, r.atrasoDe),
+    max: Math.max(acc.max, r.atrasoAte)
+  }), { min: Infinity, max: -Infinity });
+
+  console.log([min,max])
+
+}
+
 class CobrancasController {
 
   static _getFaturas(id) {
+    
+    const reguas = this._usesCases().reguaUseCase.getAll()
+
+    const { min, max } = reguas.reduce((acc, r) => ({
+      min: Math.min(acc.min, r.atrasoDe),
+      max: Math.max(acc.max, r.atrasoAte)
+    }), { min: Infinity, max: -Infinity });
+
     const params = {
       codCliente: [{op: '=', value: Number(id)}],
-      //status: [{op: '=', value: 'VENCIDA'}]
+      diasAtraso: [{op: '>=', value: min}, {op: '<=', value: max}]
     }
 
     const service = this._usesCases().faturasUseCase
@@ -20,7 +41,10 @@ class CobrancasController {
       cobrancasUseCase: new CobrancasUseCase(
         {cobrancasRepository: new SheetsCobrancasRepository()}
       ),
-      sendChargeUseCase: new SendChargeUseCase()
+      sendChargeUseCase: new SendChargeUseCase(),
+      reguaUseCase: new ReguaService(
+        {reguaRepository: new SheetsReguaRepository()}
+      )
     }
   }
 
