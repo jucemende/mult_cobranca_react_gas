@@ -29,6 +29,7 @@ class FaturasUseCase {
     const search = params.search
 
     const faturas = this.repository.getAll()
+    
     const clientes = this.boots.clientes()
     const { taxaJuros, taxaMulta } = this._getEncargos()
 
@@ -41,7 +42,7 @@ class FaturasUseCase {
         })
         : null
       
-      return new FaturasListDTO(f, clientes[f.codCliente]?.cliente, encargo)
+      return new FaturasListDTO(f, clientes[f.codCliente], encargo)
 
     })
     
@@ -61,7 +62,11 @@ class FaturasUseCase {
     if (!id) throw new Error('ID é obrigatório');
     
     const fatura = this.repository.getById(id)
+    if (!fatura) throw new Error('Registro não encontrado')
+    
     const clientes = this.boots.clientes()
+    const cobrancas = this.boots.cobrancas()
+  
     const { taxaJuros, taxaMulta } = this._getEncargos()
 
     const encargo = fatura.diasAtraso > 0 && fatura.possuiEncargos
@@ -71,7 +76,7 @@ class FaturasUseCase {
       })
       : null
 
-    return new FaturasListDTO(fatura, clientes[fatura.codCliente]?.cliente, encargo)
+    return new FaturasListDTO(fatura, clientes[fatura.codCliente], encargo)
   }
 
   create(data) {

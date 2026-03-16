@@ -42,7 +42,11 @@ class VendedorService {
 
   getById( id ) {
     if (!id) throw new Error('ID é obrigatório');
-    return this.repository.getById(id);
+    const vendedor = this.repository.getById(id);
+
+    if (!vendedor) throw new Error('Registro não encontrado')
+
+    return vendedor
   }
 
   create(data) {

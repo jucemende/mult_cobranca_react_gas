@@ -8,9 +8,22 @@ function TesteApp() {
     possuiEncargos: true
   }
 
-  const request ={
-    url: 'faturas'
-  }
+  /*const request ={
+    method: 'POST',
+    url: 'cobrancas',
+    body: {
+      codCliente: '9937',
+      perfil: 'CRITICA',
+      cliente: 'ROTHA FARMS LIVESTOCK MT',
+      canal: 'AUTOMACAO',
+      acao: 'NOTIFICACAO',
+      status: 'FINALIZADO',
+      email: 'rdalmeida@rothafarms.com;josevaldirjorge@hotmail.com',
+      telefone: ''
+    }
+  }*/
+
+  const request = {url: 'cobrancas-sendEmail/9937'}
   
   const res = app(request)
 
@@ -23,7 +36,8 @@ const RouterRegistry = {
   reguas: ReguaRouters,
   vendedors: VendedorRouters,
   clientes: ClienteRouters,
-  faturas: FaturasRouters
+  faturas: FaturasRouters,
+  cobrancas: CobrancasRouters
 };
 
 function app(request) {
@@ -32,7 +46,7 @@ function app(request) {
 
   let [path, queryString] = url.split('?');
   const params = parseQuery(queryString);
-
+  
   const requestParams = { method, path, body, params };
 
   let domain = path.split('/').filter(Boolean);
@@ -72,7 +86,6 @@ function parseQuery(queryString = '') {
 
   return params;
 }
-
 
 function coerceValue(value) {
 

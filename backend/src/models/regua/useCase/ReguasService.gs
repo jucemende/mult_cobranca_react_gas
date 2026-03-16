@@ -16,7 +16,7 @@ function TestReguaService() {
     reguaRepository: new SheetsReguaRepository()
   })
 
-  const data = service.create(dadosCriacao)
+  const data = service.getAll()
 
   console.log(data)
 
@@ -32,7 +32,11 @@ class ReguaService {
     
     const search = params.search
 
-    let rows = this.repository.getAll();
+    const reguas = this.repository.getAll()
+    
+    let rows = reguas.map(r => {
+      return new ReguaListDTO(r)
+    }) 
   
     if (search) {
       rows = this.repository.applyAdvancedSearch(rows, search[0].value);
@@ -48,7 +52,11 @@ class ReguaService {
 
   getById( id ) {
     if (!id) throw new Error('ID é obrigatório');
-    return this.repository.getById(id);
+    const regua = this.repository.getById(id);
+
+    if (!regua) throw new Error('Registro não encontrado')
+
+    return regua
   }
 
   create(data) {

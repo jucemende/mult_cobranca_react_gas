@@ -5,12 +5,9 @@ class FaturasController {
       invoicesUseCase: new FaturasUseCase(
         {faturasRepository: new SheetsFaturasRepository()}
       ),
-      /*invoicesGroupedUseCase: new FaturasGroupedUseCase(
+      invoicesGroupedUseCase: new FaturasGroupedUseCase(
         {faturasRepository: new SheetsFaturasRepository()}
-      ),
-      cobrancasUseCase: new CobrancasUseCase(
-        {cobrancasRepository: new SheetsCobrancasRepository()}
-      )*/
+      )
     }
   }
 
@@ -33,14 +30,13 @@ class FaturasController {
   }
 
   static getInvoice({ id = null, params = {} }){
-    
     const service = this._usesCases().invoicesUseCase
-
     return this.get({service, id, params})
   }
 
   static getGrouped({ id = null, params = {} }){
-    const faturas = this.get({id, params})
+    const service = this._usesCases().invoicesGroupedUseCase
+    return this.get({service, id, params})
   }
 
   static postInvoice({ data }) {

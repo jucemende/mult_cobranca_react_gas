@@ -1,8 +1,8 @@
 function testBootstrap(){
 
-  const { taxaJuros, taxaMulta } = _getEncargos()
+  const cobrancas = BootstrapIndex().cobrancas()
 
-  console.log([taxaJuros, taxaMulta])
+  console.log(cobrancas)
 
 }
 
@@ -33,10 +33,28 @@ function BootstrapIndex() {
     )
   }
 
+  const regua = () => {
+    const listRegua = new SheetsReguaRepository().getAll()
+
+    return Object.fromEntries(
+      listRegua.map(r => [r.id, r])
+    )
+  }
+
+  const cobrancas = () => {
+    const listCobranca = new SheetsCobrancasRepository().getAll()
+
+    return Object.fromEntries(
+      listCobranca.map(c => [c.documento, c])
+    )
+  }
+
   return {
     clientes,
     vendedores,
-    encargos
+    encargos,
+    regua,
+    cobrancas
   }
 
 }

@@ -24,7 +24,11 @@ class EncargosService {
 
   getById( id ) {
     if (!id) throw new Error('ID é obrigatório');
-    return this.repository.getById(id);
+    const encargo = this.repository.getById(id);
+
+    if (!encargo) throw new Error('Registro não encontrado')
+
+    return encargo
   }
 
   create(data) {

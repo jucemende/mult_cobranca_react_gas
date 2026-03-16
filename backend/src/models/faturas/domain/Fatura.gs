@@ -46,6 +46,7 @@ function schemaDomainFatura(){
     vencimento: undefined,
     vlrLiquido: undefined,
     possuiEncargos: undefined,
+    cobrado: null,
     criadoEm: null
   }
 }
@@ -71,6 +72,7 @@ class Fatura {
       : getEnunsFatura().tipoDocumento.REEMBOLSO
 
     this._diasAtraso = this._verificaAtraso(this.vencimento)
+    this._cobrado = false
     
     this._status = this._diasAtraso > 0
       ? getEnunsFatura().status.VENCIDA
@@ -166,8 +168,10 @@ class Fatura {
   get tipoDocumento() { return this._tipoDocumento }
   get diasAtraso() { return this._diasAtraso }
   get status() { return this._status }
+  get cobrado() { return this._cobrado }
   get criadoEm() { return this._criadoEm }
 
   set id(value) { return this._id = value }
+  set cobrado(value) { return this._cobrado = value }
 
 }

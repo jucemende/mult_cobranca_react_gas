@@ -27,8 +27,12 @@ class FaturasListDTO {
     this.id = faturas.id
     this.documento = faturas.documento
     this.codCliente = faturas.codCliente
-    this.cliente = cliente ?? null
+    this.cliente = cliente?.cliente ?? null
+    this.email = cliente?.email ?? null
+    this.telefone = cliente?.telefone ?? null
+    this.idVendedor = cliente?.idVendedor ?? null
     this.vencimento = faturas.vencimento
+    this.status = faturas.status
     this.diasAtraso = faturas.diasAtraso
     this.vlrLiquido = faturas.vlrLiquido
     this.tipoDocumento = faturas.tipoDocumento

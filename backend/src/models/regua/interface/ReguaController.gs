@@ -25,12 +25,12 @@ class ReguaController {
   }
 
   static post({ data }) {
-    const dto = new ReguaDTO(data);
+    const dto = new ReguaCreateDTO(data);
     return this.service().create(dto);
   }
 
   static put({ id, data }) {
-    const dto = new ReguaDTO(data);
+    const dto = new ReguaCreateDTO(data);
     return this.service().update(id, dto);
   }
 

@@ -54,6 +54,9 @@ class ClienteService {
   getById( id ) {
     if (!id) throw new Error('ID é obrigatório');
     const cliente = this.repository.getById(id)
+    
+    if (!cliente) throw new Error('Registro não encontrado')
+    
     const vendedores = this.boots.vendedores()
     return new ClienteListDTO(cliente, vendedores[cliente.idVendedor]?.vendedor)
   }

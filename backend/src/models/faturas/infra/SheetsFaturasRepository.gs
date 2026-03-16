@@ -42,8 +42,11 @@ class SheetsFaturasRepository extends FaturasRepository {
       'documento',
       'codCliente',
       'cliente',
+      'vendedor',
       'vencimento',
       'diasAtraso',
+      'status',
+      'ultVencimento',
       'vlrLiquido',
       'tipoDocumento',
       'multa',
@@ -71,8 +74,11 @@ class SheetsFaturasRepository extends FaturasRepository {
       documento: row => row.documento,
       codCliente: row => row.codCliente,
       cliente: row => row.cliente,
+      vendedor: row => row.vendedor,
       vencimento: row => row.vencimento,
+      ultVencimento: row => row.ultVencimento,
       diasAtraso: row => row.diasAtraso,
+      status: row => row.status,
       vlrLiquido: row => row.vlrLiquido,
       tipoDocumento: row => row.tipoDocumento
 
@@ -143,7 +149,7 @@ class SheetsFaturasRepository extends FaturasRepository {
       vencimento: fatura.vencimento,
       vlr_liquido: fatura.vlrLiquido,
       possui_encargos: fatura.possuiEncargos,
-      criado_e: fatura.criadoEm
+      criado_em: fatura.criadoEm
     };
   }
 
