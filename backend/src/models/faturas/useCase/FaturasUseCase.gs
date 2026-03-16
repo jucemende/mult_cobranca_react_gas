@@ -12,7 +12,7 @@ function TestFaturasUseCase() {
     faturasRepository: new SheetsFaturasRepository()
   })
 
-  const data = service.getById('77251a')
+  const data = service.getById('77837a')
   console.log(data)
 
 }

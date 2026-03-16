@@ -21,8 +21,8 @@ function CobrancasRouters(request) {
     case 'POST/cobrancas':
       return controller.post({ data: body })
 
-    case 'cobrancas-sendEmail':
-      return controller.sendEmail({ id })
+    case 'POST/cobrancas-sendCharge':
+      return controller.sendCharge({ data: body })
     
     default:
       throw new Error(`Método '${method}' não suportado`);

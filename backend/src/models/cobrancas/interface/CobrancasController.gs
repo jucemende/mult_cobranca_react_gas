@@ -3,7 +3,7 @@ class CobrancasController {
   static _getFaturas(id) {
     const params = {
       codCliente: [{op: '=', value: Number(id)}],
-      status: [{op: '=', value: 'VENCIDA'}]
+      //status: [{op: '=', value: 'VENCIDA'}]
     }
 
     const service = this._usesCases().faturasUseCase
@@ -19,7 +19,8 @@ class CobrancasController {
       ),
       cobrancasUseCase: new CobrancasUseCase(
         {cobrancasRepository: new SheetsCobrancasRepository()}
-      )
+      ),
+      sendChargeUseCase: new SendChargeUseCase()
     }
   }
 
@@ -37,6 +38,11 @@ class CobrancasController {
     const faturas = this._getFaturas(dto.codCliente)
     dto.faturas = faturas
     return this._usesCases().cobrancasUseCase.create(dto);
+  }
+
+  static sendCharge({ data }) {
+    data.view = this.getView({ id: data.codCliente })
+    return this._usesCases().sendChargeUseCase.send({ data })
   }
 
 }

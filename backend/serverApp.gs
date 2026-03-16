@@ -8,23 +8,21 @@ function TesteApp() {
     possuiEncargos: true
   }
 
-  /*const request ={
+  const request = {
     method: 'POST',
-    url: 'cobrancas',
+    url: 'cobrancas-sendCharge',
     body: {
-      codCliente: '9937',
+      codCliente: '9937', //10602 - 9937
       perfil: 'CRITICA',
       cliente: 'ROTHA FARMS LIVESTOCK MT',
-      canal: 'AUTOMACAO',
+      canal: 'EMAIL',
       acao: 'NOTIFICACAO',
       status: 'FINALIZADO',
       email: 'rdalmeida@rothafarms.com;josevaldirjorge@hotmail.com',
-      telefone: ''
+      telefone: '62 99240-9051'
     }
-  }*/
+  }
 
-  const request = {url: 'cobrancas-sendCharge/9937'}
-  
   const res = app(request)
 
   console.log(res)
