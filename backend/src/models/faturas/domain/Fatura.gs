@@ -96,6 +96,7 @@ class Fatura {
       vencimento: props.vencimento ?? this.vencimento,
       vlrLiquido: props.vlrLiquido ?? this._vlrLiquido,
       possuiEncargos: props.possuiEncargos ?? this._possuiEncargos,
+      cobrado: props.cobrado ?? this._cobrado,
       criadoEm: this._criadoEm
     })
   }

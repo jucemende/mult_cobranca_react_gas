@@ -23,7 +23,7 @@ function TesteApp() {
     }
   }*/
 
-  const request = {url: 'cobrancas-sendEmail/9937'}
+  const request = {url: 'cobrancas-sendCharge/9937'}
   
   const res = app(request)
 

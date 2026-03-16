@@ -12,7 +12,7 @@ function TestFaturasUseCase() {
     faturasRepository: new SheetsFaturasRepository()
   })
 
-  const data = service.getAll()
+  const data = service.getById('77251a')
   console.log(data)
 
 }
@@ -31,10 +31,13 @@ class FaturasUseCase {
     const faturas = this.repository.getAll()
     
     const clientes = this.boots.clientes()
+    const cobrancas = this.boots.cobrancas()
     const { taxaJuros, taxaMulta } = this._getEncargos()
 
     let rows = faturas.map(f => {
       
+      if(cobrancas[f.documento]?.length) f.cobrado = true
+
       const encargo = f.diasAtraso > 0 && f.possuiEncargos
         ? f.calcularEncargos({
           taxaJuros,
@@ -66,7 +69,9 @@ class FaturasUseCase {
     
     const clientes = this.boots.clientes()
     const cobrancas = this.boots.cobrancas()
-  
+
+    if(cobrancas[fatura.documento]?.length) fatura.cobrado = true
+    
     const { taxaJuros, taxaMulta } = this._getEncargos()
 
     const encargo = fatura.diasAtraso > 0 && fatura.possuiEncargos

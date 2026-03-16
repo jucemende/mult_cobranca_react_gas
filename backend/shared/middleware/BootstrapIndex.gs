@@ -2,7 +2,7 @@ function testBootstrap(){
 
   const cobrancas = BootstrapIndex().cobrancas()
 
-  console.log(cobrancas)
+  console.log(cobrancas['14188'])
 
 }
 
@@ -42,11 +42,12 @@ function BootstrapIndex() {
   }
 
   const cobrancas = () => {
-    const listCobranca = new SheetsCobrancasRepository().getAll()
-
-    return Object.fromEntries(
-      listCobranca.map(c => [c.documento, c])
-    )
+    const listCobranca = new SheetsCobrancasRepository().getAll();
+    
+    return listCobranca.reduce((acc, c) => {
+      (acc[c.documento] = acc[c.documento] || []).push(c);
+      return acc;
+    }, {});
   }
 
   return {

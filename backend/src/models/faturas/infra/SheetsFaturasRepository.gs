@@ -51,7 +51,8 @@ class SheetsFaturasRepository extends FaturasRepository {
       'tipoDocumento',
       'multa',
       'juros',
-      'total'
+      'total',
+      'cobrado'
       
     ];
 
@@ -80,7 +81,8 @@ class SheetsFaturasRepository extends FaturasRepository {
       diasAtraso: row => row.diasAtraso,
       status: row => row.status,
       vlrLiquido: row => row.vlrLiquido,
-      tipoDocumento: row => row.tipoDocumento
+      tipoDocumento: row => row.tipoDocumento,
+      cobrado: row => row.cobrado
 
     };
 

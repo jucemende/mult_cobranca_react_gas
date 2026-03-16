@@ -37,6 +37,7 @@ class FaturasListDTO {
     this.vlrLiquido = faturas.vlrLiquido
     this.tipoDocumento = faturas.tipoDocumento
     this.criadoEm = faturas.criadoEm
+    this.cobrado = faturas.cobrado,
     this.multa = encargo?.multa ?? 0
     this.juros = encargo?.juros ?? 0
     this.total = encargo?.total ?? faturas.vlrLiquido

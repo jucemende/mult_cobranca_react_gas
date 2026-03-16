@@ -49,7 +49,8 @@ class FaturasGroupedUseCase extends FaturasUseCase {
           ultVencimento: fatura.diasAtraso ?? 0,
           multa: 0,
           juros: 0,
-          total: 0
+          total: 0,
+          cobrado: false
         };
       }
 
@@ -58,6 +59,8 @@ class FaturasGroupedUseCase extends FaturasUseCase {
       acc[clienteId].multa += fatura.multa || 0
       acc[clienteId].juros += fatura.juros || 0
       acc[clienteId].total += fatura.total || 0
+
+      acc[clienteId].cobrado = acc[clienteId].cobrado || !!fatura.cobrado
 
       return acc;
 
