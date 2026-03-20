@@ -1,13 +1,7 @@
 function testControllerCobrancas() {
   const controller = new CobrancasController()
-  const reguas = controller._usesCases().reguaUseCase.getAll()
-
-  const { min, max } = reguas.reduce((acc, r) => ({
-    min: Math.min(acc.min, r.atrasoDe),
-    max: Math.max(acc.max, r.atrasoAte)
-  }), { min: Infinity, max: -Infinity });
-
-  console.log([min,max])
+  
+  console.log(controller.getAll())
 
 }
 
@@ -49,7 +43,10 @@ class CobrancasController {
   }
 
   static getAll({ id = null, params = {} }){
-    return this._usesCases().cobrancasUseCase.getAll(params)
+    return {
+      data: this._usesCases().cobrancasUseCase.getAll(params),
+      tableConfig: getConfigCobrancas().tableConfig
+    }
   }
 
   static getView({ id = null, params = {} }) {

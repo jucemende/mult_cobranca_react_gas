@@ -1,7 +1,7 @@
 <script type="text/babel">
   
   const NavBar = () => {
-    const [currentView, setCurrentView] = React.useState('configuracoes');
+    const [currentView, setCurrentView] = React.useState('cobrancas');
 
     const menuItems = [
       { id: 'dashboard', label: 'Dashboard', icon: 'layout-dashboard' },
@@ -34,11 +34,11 @@
         </div>
 
         <main className="content-area">
-          {currentView === 'dashboard' && <window.Dashboard />}
-          {currentView === 'cobrancas' && <window.Cobrancas />}
-          {currentView === 'clientes' && <window.Clientes />}
-          {currentView === 'vendedores' && <window.Vendedores />}
-          {currentView === 'configuracoes' && <window.Configuracoes />}
+          {currentView === 'dashboard' && <Dashboard />}
+          {currentView === 'cobrancas' && <Cobrancas />}
+          {currentView === 'clientes' && <Clientes />}
+          {currentView === 'vendedores' && <Vendedores />}
+          {currentView === 'configuracoes' && <Configuracoes />}
         </main>
       </div>
     );

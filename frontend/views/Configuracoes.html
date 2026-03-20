@@ -2,71 +2,7 @@
   
   const Configuracoes = () => {
     
-    const [loading, setLoading] = React.useState(true)
-    const [data, setData] = React.useState([]);
-    const [tableConfig, setTableConfig] = React.useState({})
-    const [filterConfig, setFilterConfig] = React.useState([])
-
-    const [screenFilter, setScreenFilter] = React.useState(false)
-    const [search, setSearch] = React.useState("")
-    const [filters, setFilters] = React.useState({})
-
-    const requestIdRef = React.useRef(0)
-
-    // Mapa de função da view
-    const actionHandlers = {
-      edit: (row) =>  {alert(`Editando ${row._id}`)},
-      delete: (row) => {alert(`Deletando ${row._id}`)} // função async
-    }
-
-    // Função para montar a query da request
-    const getRequest = (searchTerm = "", activeFilters = {}) => {
-
-      const query = new URLSearchParams({
-        search: searchTerm || "",
-        ...activeFilters
-      }).toString();
-
-      return query ? `encargos?${query}` : "encargos"
-      
-    }
-
-    React.useEffect(() => {
-
-      const requestId = ++requestIdRef.current
-      const getData = async (req) => {
-        
-        // Proteção contra race condition
-        if (requestId !== requestIdRef.current) return
-
-        const res = await googleFatch(req).GET()
-        const { data, tableConfig, filterConfig } = res.response
-
-        if(loading) {
-          setTableConfig(tableConfig)
-          setFilterConfig(filterConfig)
-        }
-
-        setData(data)
-        setLoading(false)
-
-      }
-
-      if(loading) {
-        
-        // Carregamento inicial
-        getData(getRequest())
-
-      } else {
-
-        // Filtros
-        const delay = setTimeout(() => {
-          getData(getRequest(search, filters))
-        }, 400)
-
-      }
-
-    }, [search, filters])
+    //const { data, isLoading, error } = useEncargos();
 
     return (
       <>
@@ -99,9 +35,6 @@
             <i data-lucide="search"></i>
             <input
               className="input-buscaAvancada"
-              type="search"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
               placeholder="Buscar..."
             />
           </div>
@@ -117,21 +50,14 @@
           </div>
         </div>
         
-        {loading ? (
-          <Loading />
-        ) : (
-          <>
-          <Table
-            tableConfig={tableConfig}
-            data={data}
-            actionHandlers={actionHandlers}
-          />
-
-          </>
-        )}
-
-
-
+        <Table
+          tableConfig={data?.response?.tableConfig}
+          data={data?.response?.data || []}
+          isLoading={isLoading}
+          actionHandlers={{
+            edit: (item) => console.log("Editando:", item)
+          }}
+        />
       </>
     );
   }

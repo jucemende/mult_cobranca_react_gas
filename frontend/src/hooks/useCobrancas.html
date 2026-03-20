@@ -1,0 +1,28 @@
+<script>
+  const rotas = {
+    clientes: 'faturas-agrupadas',
+    faturas: 'faturas-list',
+    pendencias: 'cobrancas-list'
+  }
+
+  function useCobrancas(aba) {
+    return useQuery({
+      queryKey: ['cobranca', aba],
+      queryFn: () => {
+        const endpoint = rotas[aba]
+
+        if (!endpoint) {
+          throw new Error(`Rota ${aba} não configurada.`);
+        }
+        
+        return googleFetch().get(endpoint)
+        
+      },
+      refetchOnWindowFocus: false,
+      staleTime: 1000 * 60 * 1,
+      enabled: !!rotas[aba]
+    });
+  }
+
+
+</script>

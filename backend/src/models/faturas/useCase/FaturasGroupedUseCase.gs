@@ -43,6 +43,7 @@ class FaturasGroupedUseCase extends FaturasUseCase {
       if (!acc[clienteId]) {
         acc[clienteId] = {
           codCliente: fatura.codCliente,
+          id: fatura.clienteId,
           cliente: fatura.cliente,
           vendedor: vendedores[fatura?.idVendedor]?.vendedor ?? null,
           vlrLiquido: 0,
@@ -54,11 +55,15 @@ class FaturasGroupedUseCase extends FaturasUseCase {
         };
       }
 
-      acc[clienteId].vlrLiquido += fatura.vlrLiquido || 0
+      const valorLimpo = (value) => {
+        return Number(value.replace(/[^\d,]/g, '').replace(',', '.')) || 0
+      }
+
+      acc[clienteId].vlrLiquido += valorLimpo(fatura.vlrLiquido)
       acc[clienteId].ultVencimento = Math.max(acc[clienteId].ultVencimento, fatura.diasAtraso || 0)
-      acc[clienteId].multa += fatura.multa || 0
-      acc[clienteId].juros += fatura.juros || 0
-      acc[clienteId].total += fatura.total || 0
+      acc[clienteId].multa += valorLimpo(fatura.multa)
+      acc[clienteId].juros += valorLimpo(fatura.juros)
+      acc[clienteId].total += valorLimpo(fatura.total)
 
       acc[clienteId].cobrado = acc[clienteId].cobrado || !!fatura.cobrado
 
@@ -66,7 +71,7 @@ class FaturasGroupedUseCase extends FaturasUseCase {
 
     }, {})
 
-    return Object.values(grouped)
+    return Object.values(grouped).map(dados => new FaturasGroupedDTO(dados))
   }
 
 }

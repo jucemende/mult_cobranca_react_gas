@@ -1,16 +1,19 @@
 <script type="text/babel">
 
-  const { useEffect } = React
+  const { useEffect } = React;
 
-  const Table = ({ tableConfig = {}, data = [], actionHandlers = {} }) => {
-    
-    const { headers = [], actions = [], domain } = tableConfig
+  const Table = ({ tableConfig = {}, data = [], actionHandlers = {}, isLoading = false }) => {
+    const { headers = [], actions = [] } = tableConfig;
 
     useEffect(() => {
       if (window.lucide) {
         window.lucide.createIcons();
       }
-    }, [data, tableConfig]);
+    }, [data, tableConfig, isLoading]);
+
+    if (isLoading) {
+      return <Loading />;
+    }
 
     return (
       <div className="container-tabela">
@@ -20,61 +23,72 @@
               {headers.map(col => (
                 <th key={col.key}>{col.label}</th>
               ))}
-              {actions.length > 0 && <th></th>}
+              {actions.length > 0 && <th>Ações</th>}
             </tr>
           </thead>
 
           <tbody>
-            {data.length === 0 && (
+            {data.length === 0 ? (
               <tr>
-                <td colSpan={headers.length+1} style={{ textAlign: "center" }}>
+                <td colSpan={headers.length + (actions.length > 0 ? 1 : 0)} style={{ textAlign: "center" }}>
                   Nenhum registro encontrado
                 </td>
               </tr>
-            )}
+            ) : (
+              data.map((row) => (
+                // Uso de row.id para melhor performance do React
+                <tr key={row.id || row.key || Math.random()}>
+                  {headers.map(col => {
+                    const rawValue = row[col.key];
 
-            {data.map((row, index) => (
-              <tr key={index}>
-                {headers.map(col => {
-                  const rawValue = row[col.key];
+                    // Renderização de Tags/Estilos
+                    if (col.style) {
+                      const tag = col.style.find(t => t.value === rawValue);
+                      return (
+                        <td key={col.key}>
+                          <span className={tag ? `tag ${tag.className}` : "tag"}>
+                            {rawValue}
+                          </span>
+                        </td>
+                      );
+                    }
 
-                  if (col.style) {
-                    const tag = col.style.find(t => t.value === rawValue);
+                    if(col.icon) {
+                      
+                      const icon = rawValue
+                        ? 'circle-check-big'
+                        : 'circle-x'
 
-                    return (
-                      <td key={col.key}>
-                        <span className={tag ? `tag ${tag.className}` : ""}>
-                          {rawValue}
-                        </span>
-                      </td>
-                    );
-                  }
+                      return (
+                        <td key={col.key}>
+                          <i data-lucide={icon}></i>
+                        </td>
+                      )
+                    }
 
-                  return (
-                    <td key={col.key}>
-                      {rawValue}
+                    return <td key={col.key}>{rawValue}</td>;
+                  })}
+
+                  {/* Ações */}
+                  {actions.length > 0 && (
+                    <td>
+                      <div className="container-acoes">
+                        {actions.map(action => (
+                          <button
+                            key={action.type}
+                            title={action.title}
+                            className={`table-action-btn ${action.className || ''}`}
+                            onClick={() => actionHandlers[action.type]?.(row)}
+                          >
+                            <i data-lucide={action.icon}></i>
+                          </button>
+                        ))}
+                      </div>
                     </td>
-                  );
-                })}
-                {actions.length > 0 && (
-                  <td>
-                    <div className="container-acoes">
-                      {actions.map(action =>(
-                        <button
-                          title={action.title}
-                          className="table-action-btn"
-                          key={action.type}
-                          onClick={() => actionHandlers[action.type]?.(row)}
-                        >
-                          <i data-lucide={action.icon}></i>
-                        </button>
-                      ))}
-                    </div>
-                  </td>
-                )}
-
-              </tr>
-            ))}
+                  )}
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>

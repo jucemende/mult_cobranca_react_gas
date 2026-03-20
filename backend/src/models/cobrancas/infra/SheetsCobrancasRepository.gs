@@ -44,7 +44,6 @@ class SheetsCobrancasRepository extends CobrancasRepository {
       'documento',
       'cliente',
       'diasAtraso',
-      'vlrLiquido',
       'dataContato',
       'regua',
       'canal',
@@ -71,13 +70,11 @@ class SheetsCobrancasRepository extends CobrancasRepository {
 
       documento: row => row.documento,
       cliente: row => row.cliente,
-      codCliente: row => row.codCliente,
       dataContato: row => row.dataContato,
       regua: row => row.regua,
       canal: row => row.canal,
       acao: row => row.acao,
-      status: row => row.status,
-      criadoEm: row => row.criadoEm
+      status: row => row.status
 
     };
 

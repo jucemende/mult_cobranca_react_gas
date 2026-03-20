@@ -1,8 +1,9 @@
 function testBootstrap(){
 
-  const cobrancas = BootstrapIndex().cobrancas()
+  let vendedores = BootstrapIndex().clientes()
 
-  console.log(cobrancas['14188'])
+  //vendedores = Object.values(vendedores).map(i => ({key: i._id, value: i.vendedor}))
+  console.log(vendedores)
 
 }
 

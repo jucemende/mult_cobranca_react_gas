@@ -1,9 +1,330 @@
 <script type="text/babel">
   const Cobrancas = () => {
+    
+    const [abaAtiva, setAbaAtiva] = React.useState('clientes')
+    const [recordBusca, setRecordBusca] = React.useState(null)
+    const [isEdition, setIsEdition] = React.useState(false)
+    
+    const { data, isLoading, error } = useCobrancas(abaAtiva);
+    
+    //const mutation = useCreateFatura();
+
+    const openForms = (item) => {
+
+      switch (abaAtiva)  {
+        case 'clientes':
+          setRecordBusca(item.clienteId)
+          setIsEdition(true)
+          break
+        case 'faturas':
+          setIsEdition(true)
+          break
+        case 'pendencias':
+          setIsEdition(true)
+          break
+        default:
+          break
+      }
+    }
+
+    React.useEffect(() => {
+      if (window.lucide) {
+        window.lucide.createIcons()
+      }
+    })
+
+    if(!isLoading) console.log(data)
+
     return (
-      <div>
-        <h1>Gestão de Cobrancas</h1>
-      </div>
+      <>
+        <div className="conteiner-titulo-pag">
+          <div id="conteiner-title-pag">
+            <h1>Gestão de Cobranças</h1>
+            <p>Acompanhe o andamento de todas as fases de cobrança</p>
+          </div>
+          
+          <div id="container-btns-title">
+            <button className="btn-primario btn-title">
+              <i data-lucide="plus"></i>
+              <span>Adicionar Fatura</span>
+            </button>
+          </div>
+        </div>
+
+        <div className="conteiner-btn-seguimentacao">
+          <button 
+            className={`btn-seguimentoRegua ${abaAtiva === 'clientes' ? 'ativo' : ''}`}
+            onClick={() => {setAbaAtiva('clientes'), setIsEdition(false)}}
+          >
+            <span>Clientes</span>
+          </button>
+
+          <button
+            className={`btn-seguimentoRegua ${abaAtiva === 'faturas' ? 'ativo' : ''}`}
+            onClick={() => {setAbaAtiva('faturas'), setIsEdition(false)}}
+          >
+            <span>Faturas</span>
+          </button>
+
+          <button
+            className={`btn-seguimentoRegua ${abaAtiva === 'pendencias' ? 'ativo' : ''}`}
+            onClick={() => {setAbaAtiva('pendencias'), setIsEdition(false)}}
+          >
+            <span>Pendências</span>
+          </button>
+        </div>
+
+        <div class="conteiner-totais-seguimentacao">
+
+          <div class="totais-seguimentacao">
+            <p class="label-totais">Em Aberto</p>
+            <p id="totalAberto" class="campo-totais">R$ 0,00</p>
+          </div>
+          <div class="totais-seguimentacao">
+            <p class="label-totais">Baixadas</p>
+            <p id="totalBaixado" class="campo-totais">R$ 0,00</p>
+          </div>
+          <div class="totais-seguimentacao">
+            <p class="label-totais">Cobradas</p>
+            <p id="totalCobrado" class="campo-totais">R$ 0,00</p>
+          </div>
+          <div class="totais-seguimentacao">
+            <p class="label-atualizacao">Última Atualização</p>
+            <p id="dtUltimaAtualizacao">01/01/1900</p>
+          </div>
+
+        </div>
+
+        <div className="container-filtros">
+          <div className="busca-avancada">
+            <i data-lucide="search"></i>
+            <input
+              className="input-buscaAvancada"
+              placeholder="Buscar..."
+            />
+          </div>
+
+          <div className="container-select-filtros">
+            <button className="btn-secundario">
+              Filtros
+              <i data-lucide="funnel"></i>
+              <div className="count-filtros" id="count-filtros">0</div>
+            </button>
+
+            <div className="container-filtrado" id="tagsFiltradas"></div>
+          </div>
+        </div>
+
+        <Table
+          tableConfig={data?.response?.tableConfig}
+          data={data?.response?.data || []}
+          isLoading={isLoading}
+          actionHandlers={{
+            edit: (item) => openForms(item)
+          }}
+        />
+
+        { isEdition && (
+          <>
+            {abaAtiva === 'clientes' &&(
+              <FormCliente onClose={() => setIsEdition(false)} id={recordBusca}/>
+            )}
+          </>
+        )}
+      </>
     );
-  };
+  }
 </script>
+
+<style>
+  .btn-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .btn-title span {
+    font-size: 12px;
+  }
+
+  .btn-title svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .conteiner-btn-seguimentacao {
+    border-bottom: 1px solid #cccc;
+    padding-top: 25px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+
+  .conteiner-btn-seguimentacao button {
+    background: none;
+    border: none;
+    border-bottom: 3px solid transparent;
+    padding: 5px 24px;
+    cursor: pointer;
+  }
+
+  .conteiner-btn-seguimentacao button.ativo {
+    border-bottom: 3px solid var(--cor-verde-padrao);
+  }
+
+  .conteiner-btn-seguimentacao button.ativo span {
+    color: var(--cor-verde-padrao);
+  }
+
+  .conteiner-btn-seguimentacao button span {
+    font-weight: 600;
+    color: #626262;
+    display: inline-block;
+    transition: transform 0.25s ease, color 0.25s ease;
+  }
+
+  .conteiner-btn-seguimentacao button:hover span {
+    transform: translateY(-4px);
+    color: var(--cor-verde-padrao);
+  }
+
+  .conteiner-btn-seguimentacao button:hover {
+    border-bottom-color: var(--cor-verde-padrao);
+  }
+
+  .container-filtros {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+
+  .busca-avancada {
+    position: relative;
+    width: 250px;
+  }
+
+  .busca-avancada input {
+    padding: 8px 12px 8px 36px;
+  }
+
+  .busca-avancada svg {
+    position: absolute;
+    top: 14px;
+    transform: translateY(-25%);
+    left: 10px;
+    color: #626262;
+    width: 18px;
+    height: 18px;
+    pointer-events: none;
+  }
+
+  .container-select-filtros {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .container-select-filtros .btn-secundario {
+    width: fit-content;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 18px;
+    border-radius: 50px;
+  }
+
+  .container-select-filtros .btn-secundario svg {
+    width: 18px;
+    height: 18px;
+    pointer-events: none;
+  }
+
+  .count-filtros {
+    background-color: var(--cor-navebar);
+    color: white;
+    width: fit-content;
+    height: fit-content;
+    font-size: 8px;
+    padding: 2px 5px;
+    border-radius: 10px;
+  }
+
+  .container-filtrado {
+    display: flex;
+    gap: 10px;
+  }
+
+  .filtrado {
+    background-color: var(--cor-navebar);
+    padding: 5px 18px;
+    border-radius: 50px;
+    color: white;
+    text-transform: lowercase;
+    text-transform: capitalize;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+  }
+
+  .conteiner-totais-seguimentacao {
+    display: flex;
+    flex-wrap: wrap;
+    height: fit-content;
+    margin: 0px 0px 35px 0px;
+  }
+
+  .totais-seguimentacao {
+    border-right: 1px solid #cccc;
+    padding: 0 30px;
+  }
+
+  .totais-seguimentacao:last-child {
+    border: none;
+  }
+
+  .label-totais,
+  .label-atualizacao {
+    font-size: 11px;
+    color: #626262;
+  }
+
+  .label-totais {
+    position: relative;
+    padding-left: 15px;
+    font-size: 11px;
+    color: #626262;
+    margin-bottom: 3px;
+  }
+
+  .label-totais::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: block;
+  }
+
+  .totais-seguimentacao:nth-of-type(1) .label-totais::before {
+    background-color: var(--cor-vermelho);
+  }
+
+  .totais-seguimentacao:nth-of-type(2) .label-totais::before {
+    background-color: var(--cor-verde);
+  }
+
+  .totais-seguimentacao:nth-of-type(3) .label-totais::before {
+    background-color: var(--cor-amarelo);
+  }
+
+  .campo-totais {
+    font-weight: 500;
+  }
+</style>

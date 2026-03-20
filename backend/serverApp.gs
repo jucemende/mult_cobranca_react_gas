@@ -23,7 +23,7 @@ function TesteApp() {
     }
   }
 
-  //request = 'faturas-list?codCliente=10602&diasAtraso>=1&diasAtraso<=2'
+  request = {url: 'faturas-agrupadas'}
 
   const res = app(request)
 

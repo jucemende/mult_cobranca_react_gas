@@ -1,4 +1,4 @@
-function TestCobrancasUseCase() {
+function TestSendCobrancasUseCase() {
   const service = new SendChargeUseCase()
   const dataBulk = [
     {teste: 1},

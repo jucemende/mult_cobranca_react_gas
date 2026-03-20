@@ -1,0 +1,20 @@
+<script type="text/babel">
+  const Select = ({options = [], label = 'Select', value = null, onChange}) => {
+
+    return (
+      <div className="select-wrapper">
+        <label>{label}</label>
+        <select name={label.toLowerCase()} value={value} onChange={onChange}>
+          <option value="">Selecione</option>
+
+          {options.map((opt) => (
+            <option key={opt.key} value={opt.key}>
+              {opt.value}
+            </option>
+          ))}
+
+        </select>
+      </div>
+    )
+  }
+</script>

@@ -11,32 +11,36 @@ class FaturasController {
     }
   }
 
-  static get({ service, id = null, params = {} }) {
-    
-    const data = () => {
-
-      if(id) {
-        return service.getById(id)
-      }
-    
-      return service.getAll(params);
-
-    }
-
-    return {
-      data: data(),
-    }
-
-  }
-
   static getInvoice({ id = null, params = {} }){
+    
     const service = this._usesCases().invoicesUseCase
-    return this.get({service, id, params})
+    
+    if(id) {
+      return {
+        data: service.getById(id),
+      }
+    }
+    
+    return {
+      data: service.getAll(params),
+      tableConfig: getConfigFaturas().tableConfig
+    }
+    
   }
 
   static getGrouped({ id = null, params = {} }){
+    
     const service = this._usesCases().invoicesGroupedUseCase
-    return this.get({service, id, params})
+    
+    if(id) {
+      return service.getById(id)
+    }
+
+    return {
+      data: service.getAll(params),
+      tableConfig: getConfigFaturasAgrupadas().tableConfig
+    }
+
   }
 
   static postInvoice({ data }) {

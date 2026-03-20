@@ -1,22 +1,5 @@
 function TestCobrancasUseCase() {
   
-  const fatura = [
-    {
-      diasAtraso: 0
-    },
-    {
-      diasAtraso: 3
-    },
-    {
-      diasAtraso: 6
-    }
-  ]
-
-  const params = {
-    codCliente: [{op: '=', value: 9937}],
-    status: [{op: '=', value: 'VENCIDA'}]
-  }
-
   const serviceCharges = new CobrancasUseCase(
     {cobrancasRepository: new SheetsCobrancasRepository()}
   )
@@ -41,12 +24,23 @@ class CobrancasUseCase {
     
     const search = params.search
 
-    const cobrancas = this.repository.getAll()
+    const cobrancas = this.boots.cobrancas()
     const clientes = this.boots.clientes()
-    const regua = this.boots.regua()
+    const reguas = this.boots.regua()
     
-    let rows = cobrancas.map(c => {
-      return new CobrancasListDTO(c, clientes[c.codCliente], regua[c.reguaId])
+    const rows = Object.keys(cobrancas).map(c =>{
+      const listCobranca = cobrancas[c]
+      
+      const ultima = listCobranca.sort((a, b) =>
+        new Date(b.dataContato) - new Date(a.dataContato)
+      )[0]
+
+      const fase = reguas[ultima.reguaId]?._faseRegua
+      const cliente = clientes[ultima.codCliente]?.cliente
+      const qtdCobrancas = listCobranca.length
+
+      return new CobrancasListDTO(ultima, qtdCobrancas, cliente, fase)
+
     })
 
     if (search) {
@@ -57,7 +51,7 @@ class CobrancasUseCase {
       rows = this.repository.applyFilters(rows, params);
     }
 
-    return rows;
+    return rows
     
   }
 

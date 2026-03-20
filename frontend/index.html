@@ -5,65 +5,72 @@
     <?!= include("frontend/style"); ?>
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@tanstack/react-query@4/build/umd/index.production.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
     <script src="https://unpkg.com/lucide@latest"></script>
   </head>
   <body>
     <div id="root" class="root" ></div>
+      <!-- COMPONENTES -->
+      <?!= include("frontend/componentes/Navbar"); ?>
+      <?!= include("frontend/componentes/Loading"); ?>
+      <?!= include("frontend/componentes/Table"); ?>
+      <?!= include("frontend/componentes/Select"); ?>
 
-    <!-- COMPONENTES -->
-    <?!= include("frontend/componentes/navbar"); ?>
-    <?!= include("frontend/componentes/table"); ?>
-    <?!= include("frontend/componentes/Loading"); ?>
-    <?!= include("frontend/componentes/Filtro"); ?>
-
-    <!-- VIEWS -->
-    <?!= include("frontend/views/Clientes"); ?>
-    <?!= include("frontend/views/Cobrancas"); ?>
-    <?!= include("frontend/views/Configuracoes"); ?>
-    <?!= include("frontend/views/Dashboard"); ?>
-    <?!= include("frontend/views/Vendedores"); ?>
-    
+      <?!= include("frontend/componentes/FormCliente"); ?>
+      
+      <!-- VIEWS -->
+      <?!= include("frontend/views/Dashboard"); ?>
+      <?!= include("frontend/views/Cobrancas"); ?>
+      <?!= include("frontend/views/Clientes"); ?>
+      <?!= include("frontend/views/Vendedores"); ?>
+      <?!= include("frontend/views/Configuracoes"); ?>
+      
     <script type="text/babel">
+      
       const root = ReactDOM.createRoot(document.getElementById('root'));
-      root.render(<window.NavBar />);
-    </script>
-
-    <script>
-      function googleFatch(url){
-        
-        if(!url) throw new Error('Nenhuma url foi informada')
-        
-        const request = {url: url}
-
-        const execute = (method, body = null) => {
-          request.method = method
-          if (body) request.payload = JSON.stringify(body);
-
-          return new Promise((resolve, reject) => {
-            google.script.run
-              .withSuccessHandler(resolve)
-              .withFailureHandler(reject)
-              .fetchApp(request);
-          })
+      const { QueryClient, QueryClientProvider } = window.ReactQuery;
+      const { useQuery, useMutation, useQueryClient } = window.ReactQuery;
+      const queryClient = new QueryClient({
+        defaultOptions: {
+          queries: {
+            // Se uma busca falhar, avisa o usuário
+            onError: (err) => showToast("Erro ao carregar dados: " + err.message, "error"),
+          },
+          mutations: {
+            // Sempre que um 'save' ou 'delete' der certo
+            onSuccess: () => showToast("Operação realizada com sucesso!", "success"),
+            // Sempre que um 'save' falhar
+            onError: (err) => showToast("Falha na operação: " + err.message, "error"),
+          }
         }
+      });
 
-        return {          
-          GET: () => execute('GET'),
-        }
+      const App = () => (
+        <QueryClientProvider client={queryClient}>
+          <NavBar />
+        </QueryClientProvider>
+      );
 
-        /*
-        const POST = (body) => {}
-        const PUT = (body) => {}
-        const DELETE = () => {}
+      root.render(<App />);
 
-        return {
-          GET,
-          POST,
-          PUT,
-          DELETE
-        }*/
+      function showToast(message, type = "info", duration = 6000) {
+        const toast = document.createElement("div");
+        toast.className = `toast ${type}`;
+        toast.textContent = message;
+        document.body.appendChild(toast);
+        
+        setTimeout(() => toast.classList.add("show"), 10);
+        setTimeout(() => {
+          toast.classList.remove("show");
+          setTimeout(() => toast.remove(), 500);
+        }, duration);
       }
     </script>
+
+    <?!= include("frontend/src/service/api"); ?>
+    <?!= include("frontend/src/hooks/useCobrancas"); ?>
+    <?!= include("frontend/src/hooks/useClientes"); ?>
   </body>
 </html>

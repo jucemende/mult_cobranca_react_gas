@@ -1,0 +1,262 @@
+<script type="text/babel">
+
+  const FormCliente = ({onClose, id}) => {
+
+    const [tipoPessoa, setTipoPessoa] = React.useState('CNPJ')
+    const { data, isLoading, error } = useClientes(id);
+    
+    const [formData, setFormData] = React.useState({
+      codCliente: '',
+      cliente: '',
+      cnpj: '',
+      cpf: '',
+      telefone: '',
+      email: '',
+      obs: '',
+      vendedor: '',
+      status: ''
+    })
+
+    const handleInputChange = (e) => {
+      const { name, value } = e.target;
+      setFormData((prev) => ({
+        ...prev,
+        [name]: value,
+      }));
+    };
+
+    React.useEffect(() => {
+      if (data?.response) {
+        const cliente = data?.response?.data
+        setFormData({
+          codCliente: cliente.cod || '',
+          cliente: cliente.cliente || '',
+          cnpjCpf: cliente.cnpjCpf || '',
+          telefone: cliente.telefone || '',
+          email: cliente.email || '',
+          obs: cliente.obs || '',
+          vendedor: cliente.idVendedor || '',
+          status: cliente.status || ''
+        })
+        
+        if (cliente.tipo) setTipoPessoa(cliente.tipo)
+      }
+    }, [data])
+
+    return (
+      <div className="drawer-cliente"> 
+          
+        <form className="form-cliente">
+
+          <h3>Cadastro de Clientes</h3>
+
+          { isLoading ? ( 
+            <Loading />
+          ) : (
+            <>
+            <div className="gr-inputs">
+              <label>Tipo</label>
+              <div className="radio-group">
+                
+                <input 
+                  className="info-form-Cliente"
+                  type="radio"
+                  id="tipo_pj"
+                  name="tipo"
+                  value="CNPJ"
+                  checked={tipoPessoa === "CNPJ"}
+                  onChange={(e) => setTipoPessoa(e.target.value)}
+                />
+                <label htmlFor="tipo_pj" className="radio-label">Jurídica</label>
+
+                <input
+                  className="info-form-Cliente"
+                  type="radio"
+                  id="tipo_pf"
+                  name="tipo"
+                  value="CPF"
+                  checked={tipoPessoa === "CPF"}
+                  onChange={(e) => setTipoPessoa(e.target.value)}
+                />
+                <label htmlFor="tipo_pf" className="radio-label">Física</label>
+
+              </div>
+            </div>
+
+            <div className="conteiner-clientes">
+              <div>
+                <label>Cód.</label>
+                <input
+                  className="cod"
+                  type="number"
+                  name="codCliente"
+                  value={formData.codCliente}
+                  onChange={handleInputChange}
+                />
+              </div>
+              <div className="conteiner-nomeCliente">
+                <label>Nome do Cliente</label>
+                <input
+                  type="text"
+                  name="cliente"
+                  value={formData.cliente}
+                  onChange={handleInputChange}
+                />
+              </div>
+            </div>
+
+            <div className="type-client">
+              <label>{tipoPessoa}</label>
+              <input
+                type="text"
+                name={tipoPessoa.toLowerCase()}
+                placeholder={tipoPessoa === "CNPJ" ? "00.000.000/0000-00" : "000.000.000-00"}
+                pattern={tipoPessoa === "CNPJ" ? "\\d{2}\\.\\d{3}\\.\\d{3}/\\d{4}-\\d{2}" : "\\d{3}\\.\\d{3}\\.\\d{3}-\\d{2}"}
+                title={`Informe um ${tipoPessoa} válido`}
+                value={formData.cnpjCpf}
+                onChange={handleInputChange}
+              />
+            </div>
+
+            <div>
+              <label>Telefone</label>
+              <input
+                type="tel"
+                id="txt_telefone"
+                name="telefone"
+                value={formData.telefone}
+                onChange={handleInputChange}
+              />
+            </div>
+
+            <div>
+              <label>E-mail</label>
+              <input
+                type="text"
+                id="txt_email"
+                name="email"
+                value={formData.email}
+                onChange={handleInputChange}
+              />
+            </div>
+
+            <Select
+              options={data?.response?.vendedores}
+              label={'Vendedor'}  
+              value={formData.vendedor}
+              onChange={handleInputChange}
+            />
+
+            <Select
+              options={data?.response?.status}
+              label={'Status'}
+              value={formData.status}
+              onChange={handleInputChange}
+            />
+
+            <div>
+              <label>Observações</label>
+              <textarea
+                name="obs" rows="5"
+                value={formData.obs}
+                onChange={handleInputChange}
+              >
+              </textarea>
+            </div>
+            </>
+          )}
+
+          <div style={{ marginTop: 'auto', display: 'flex', gap: '8px' }}>
+            <button type="button" className="btn-primario">
+              Salvar
+            </button>
+
+            <button type="button" className="btn-secundario" onClick={onClose}>
+              Cancelar
+            </button>
+          </div>
+
+        </form>
+      </div>
+    )
+  }
+</script>
+
+<style>
+
+  .drawer-cliente{
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 400px;
+    height: 100%;
+    background-color: #ffffff;
+    border-left: 1px solid #ddd;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    z-index: 10;
+    box-shadow: 2px 0 6px rgba(0, 0, 0, 0.2);
+    overflow: auto;
+  }
+
+  .form-cliente {
+    display: flex; 
+    flex-direction: column; 
+    padding: 16px;
+    gap: 16px;
+    height: 100vw;
+  }
+
+  .form-cliente h3 {
+    margin: 0 0 8px 0; 
+    font-weight: 500; 
+    color: #333;"
+  }
+
+  .radio-group {
+    display: flex;
+    gap: 10px;
+  }
+
+  .radio-group input[type="radio"] {
+    display: none;
+  }
+
+  .radio-label {
+    padding: 8px 16px;
+    border: 2px solid var(--cor-navebar);
+    border-radius: 8px;
+    cursor: pointer;
+    color: var(--cor-navebar);
+    font-weight: 600;
+    transition: background 0.3s;
+    user-select: none;
+  }
+
+  .radio-label:hover {
+    background: var(--cor-verde-padrao);
+    border: 2px solid var(--cor-verde-padrao);
+    color: white;
+  }
+
+  .radio-group input[type="radio"]:checked+.radio-label {
+    background: var(--cor-verde-padrao);
+    border: 2px solid var(--cor-verde-padrao);
+    color: white;
+  }
+
+  .conteiner-clientes {
+    display: flex;
+    gap: 12px;
+  }
+
+  .codCliente {
+    width: 90px;
+  }
+
+  .conteiner-nomeCliente {
+    width: 100%
+  }
+</style>

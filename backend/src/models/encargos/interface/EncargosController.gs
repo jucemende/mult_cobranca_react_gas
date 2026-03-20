@@ -38,8 +38,7 @@ class EncargosController {
 
     return {
       data: data(),
-      tableConfig,
-      filterConfig
+      tableConfig
     }
 
   }

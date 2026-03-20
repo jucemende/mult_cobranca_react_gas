@@ -18,20 +18,17 @@ class CobrancasCreateDTO extends BaseDTO {
 }
 
 class CobrancasListDTO {
-  constructor (cobranca, cliente, regua) {
-    this.id = cobranca.id
-    this.documento = cobranca.documento
-    this.codCliente = cobranca.codCliente
-    this.cliente = cliente?.cliente ?? null
-    this.diasAtraso = cobranca.diasAtraso
-    this.vlrLiquido = cobranca.vlrLiquido
-    this.dataContato = cobranca.dataContato
-    this.reguaId = cobranca.reguaId
-    this.regua = regua?._faseRegua ?? null
-    this.canal = cobranca.canal
-    this.acao = cobranca.acao
-    this.status = cobranca.status
-    this.criadoEm = cobranca.criadoEm
+  constructor (ultima, qtdCobrancas, cliente, fase) {
+    this.id = ultima._id
+    this.codCliente = ultima.codCliente
+    this.cliente = cliente ?? null
+    this.documento = ultima.documento
+    this.qtdCobrancas = qtdCobrancas
+    this.dataContato = new Date(ultima.dataContato).toLocaleDateString()
+    this.fase = fase
+    this.canal = ultima.canal
+    this.acao = ultima.acao
+    this.status = ultima.status
   }
 }
 

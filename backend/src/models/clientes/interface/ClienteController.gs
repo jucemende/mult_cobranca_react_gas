@@ -1,3 +1,9 @@
+function testClienteController() {
+  const record = ClienteController.get({id: '424a'})
+
+  console.log(record)
+}
+
 class ClienteController {
 
   static service() {
@@ -9,18 +15,26 @@ class ClienteController {
   static get({ id = null, params = {} }) {
     
     const data = () => {
+      
+    const enunsStatus = getEnunsClientes().statusCliente
+    const status = Object.entries(enunsStatus).map(([k, v]) => ({key: k, value: v}))
 
-      if(id) {
-        return this.service().getById(id)
+    const vendedoresIndex = BootstrapIndex().vendedores()
+    const vendedores = Object.values(vendedoresIndex).map(i => ({key: i._id, value: i.vendedor}))
+
+    if(id) {
+      return {
+        data: this.service().getById(id),
+        status,
+        vendedores
       }
+    }
     
-      return this.service().getAll(params);
+    return this.service().getAll(params);
 
     }
 
-    return {
-      data: data(),
-    }
+    return data()
 
   }
 

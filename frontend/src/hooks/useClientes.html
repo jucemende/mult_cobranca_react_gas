@@ -1,0 +1,20 @@
+<script>
+  function useClientes(id = null) {
+    return useQuery({
+      queryKey: ['record-clientes', id],
+      queryFn: () => {
+        let endpoint = 'clientes'
+
+        if (id) {
+          endpoint = `${endpoint}/${id}`
+        }
+        
+        return googleFetch().get(endpoint)
+        
+      },
+      refetchOnWindowFocus: false,
+      staleTime: 1000 * 60 * 5,
+      enabled: !!id
+    });
+  }
+</script>
