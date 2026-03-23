@@ -4,8 +4,11 @@
     const [abaAtiva, setAbaAtiva] = React.useState('clientes')
     const [recordBusca, setRecordBusca] = React.useState(null)
     const [isEdition, setIsEdition] = React.useState(false)
+    const [isCobrar, setIsCobrar] = React.useState(false)
     
     const { data, isLoading, error } = useCobrancas(abaAtiva);
+
+    const presentation = data?.response?.presentation || {}
     
     //const mutation = useCreateFatura();
 
@@ -33,8 +36,6 @@
       }
     })
 
-    if(!isLoading) console.log(data)
-
     return (
       <>
         <div className="conteiner-titulo-pag">
@@ -54,21 +55,21 @@
         <div className="conteiner-btn-seguimentacao">
           <button 
             className={`btn-seguimentoRegua ${abaAtiva === 'clientes' ? 'ativo' : ''}`}
-            onClick={() => {setAbaAtiva('clientes'), setIsEdition(false)}}
+            onClick={() => {setAbaAtiva('clientes'), setIsEdition(false), setIsCobrar(false)}}
           >
             <span>Clientes</span>
           </button>
 
           <button
             className={`btn-seguimentoRegua ${abaAtiva === 'faturas' ? 'ativo' : ''}`}
-            onClick={() => {setAbaAtiva('faturas'), setIsEdition(false)}}
+            onClick={() => {setAbaAtiva('faturas'), setIsEdition(false), setIsCobrar(false)}}
           >
             <span>Faturas</span>
           </button>
 
           <button
             className={`btn-seguimentoRegua ${abaAtiva === 'pendencias' ? 'ativo' : ''}`}
-            onClick={() => {setAbaAtiva('pendencias'), setIsEdition(false)}}
+            onClick={() => {setAbaAtiva('pendencias'), setIsEdition(false), setIsCobrar(false)}}
           >
             <span>Pendências</span>
           </button>
@@ -116,11 +117,15 @@
         </div>
 
         <Table
-          tableConfig={data?.response?.tableConfig}
+          presentation={presentation}
           data={data?.response?.data || []}
           isLoading={isLoading}
           actionHandlers={{
-            edit: (item) => openForms(item)
+            edit: (item) => openForms(item),
+            cobrar: (item) => {
+              setRecordBusca(item.codCliente)
+              setIsCobrar(true)
+            }
           }}
         />
 
@@ -131,6 +136,8 @@
             )}
           </>
         )}
+
+        { isCobrar && <FormCobrancas onClose={() => setIsCobrar(false)} codCliente={recordBusca} /> }
       </>
     );
   }

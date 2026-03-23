@@ -2,14 +2,14 @@
 
   const { useEffect } = React;
 
-  const Table = ({ tableConfig = {}, data = [], actionHandlers = {}, isLoading = false }) => {
-    const { headers = [], actions = [] } = tableConfig;
+  const Table = ({ presentation = {}, data = [], actionHandlers = {}, isLoading = false }) => {
+    const { tableHeaders = [], actions = [] } = presentation;
 
     useEffect(() => {
       if (window.lucide) {
         window.lucide.createIcons();
       }
-    }, [data, tableConfig, isLoading]);
+    }, [data, presentation, isLoading]);
 
     if (isLoading) {
       return <Loading />;
@@ -20,7 +20,7 @@
         <table className="tabela-padrao">
           <thead>
             <tr>
-              {headers.map(col => (
+              {tableHeaders.map(col => (
                 <th key={col.key}>{col.label}</th>
               ))}
               {actions.length > 0 && <th>Ações</th>}
@@ -30,7 +30,7 @@
           <tbody>
             {data.length === 0 ? (
               <tr>
-                <td colSpan={headers.length + (actions.length > 0 ? 1 : 0)} style={{ textAlign: "center" }}>
+                <td colSpan={tableHeaders.length + (actions.length > 0 ? 1 : 0)} style={{ textAlign: "center" }}>
                   Nenhum registro encontrado
                 </td>
               </tr>
@@ -38,7 +38,7 @@
               data.map((row) => (
                 // Uso de row.id para melhor performance do React
                 <tr key={row.id || row.key || Math.random()}>
-                  {headers.map(col => {
+                  {tableHeaders.map(col => {
                     const rawValue = row[col.key];
 
                     // Renderização de Tags/Estilos

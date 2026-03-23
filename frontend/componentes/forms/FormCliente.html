@@ -8,20 +8,20 @@
     const [formData, setFormData] = React.useState({
       codCliente: '',
       cliente: '',
-      cnpj: '',
-      cpf: '',
+      cnpjCpf: '',
       telefone: '',
       email: '',
+      notificacao: true,
       obs: '',
       vendedor: '',
       status: ''
     })
 
     const handleInputChange = (e) => {
-      const { name, value } = e.target;
+      const { name, value, type, checked } = e.target;
       setFormData((prev) => ({
         ...prev,
-        [name]: value,
+        [name]: type === 'checkbox' ? checked : value,
       }));
     };
 
@@ -34,6 +34,7 @@
           cnpjCpf: cliente.cnpjCpf || '',
           telefone: cliente.telefone || '',
           email: cliente.email || '',
+          notificacao: cliente.permiteNotificacao ?? true,
           obs: cliente.obs || '',
           vendedor: cliente.idVendedor || '',
           status: cliente.status || ''
@@ -131,6 +132,19 @@
 
             <div>
               <label>E-mail</label>
+
+              <div className="radio-group">
+              <input
+                  className="info-form-Cliente"
+                  type="checkbox"
+                  id="notificacao"
+                  name="notificacao"
+                  checked={!!formData.notificacao}
+                  onChange={handleInputChange}
+                />
+                <label htmlFor="notificacao" className="radio-label">Recebe notificações</label>
+              </div>
+
               <input
                 type="text"
                 id="txt_email"
@@ -138,10 +152,12 @@
                 value={formData.email}
                 onChange={handleInputChange}
               />
+
             </div>
 
             <Select
               options={data?.response?.vendedores}
+              name={'vendedor'}
               label={'Vendedor'}  
               value={formData.vendedor}
               onChange={handleInputChange}
@@ -149,6 +165,7 @@
 
             <Select
               options={data?.response?.status}
+              name={'status'}
               label={'Status'}
               value={formData.status}
               onChange={handleInputChange}
@@ -220,7 +237,8 @@
     gap: 10px;
   }
 
-  .radio-group input[type="radio"] {
+  .radio-group input[type="radio"],
+  .radio-group input[type="checkbox"] {
     display: none;
   }
 
@@ -241,7 +259,8 @@
     color: white;
   }
 
-  .radio-group input[type="radio"]:checked+.radio-label {
+  .radio-group input[type="radio"]:checked+.radio-label,
+  .radio-group input[type="checkbox"]:checked+.radio-label {
     background: var(--cor-verde-padrao);
     border: 2px solid var(--cor-verde-padrao);
     color: white;

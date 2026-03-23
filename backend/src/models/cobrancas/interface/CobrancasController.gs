@@ -1,7 +1,7 @@
 function testControllerCobrancas() {
-  const controller = new CobrancasController()
+  const controller = CobrancasController
   
-  console.log(controller.getAll())
+  console.log(controller.getView({id: '6300'}))
 
 }
 
@@ -45,13 +45,16 @@ class CobrancasController {
   static getAll({ id = null, params = {} }){
     return {
       data: this._usesCases().cobrancasUseCase.getAll(params),
-      tableConfig: getConfigCobrancas().tableConfig
+      presentation: cobrancasPresentation().tableCobrancas
     }
   }
 
   static getView({ id = null, params = {} }) {
     const faturas = this._getFaturas(id)
-    return this._usesCases().cobrancasUseCase.getView(faturas)
+    return {
+      data: this._usesCases().cobrancasUseCase.getView(faturas),
+      presentation: cobrancasPresentation().viewCobranca
+    }
   }
 
   static post({ data }) {

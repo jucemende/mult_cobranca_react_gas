@@ -27,12 +27,12 @@ function getEnunsCobranca() {
       EMAIL: 'EMAIL',
       CHAT: 'CHAT',
       LIGACAO: 'LIGACAO',
-      AUTOMACAO: 'AUTOMACAO'
+      AUTOMACAO: 'AUTOMACAO',
     },
     acoes: {
       LEMBRETE: 'LEMBRETE',
       NOTIFICACAO: 'NOTIFICACAO',
-      NEGOCIACAO: 'NEGOCIACAO'
+      NEGOCIACAO: 'NEGOCIACAO',
     },
     status: {
       PENDENTE: 'PENDENTE',

@@ -23,7 +23,7 @@ class FaturasController {
     
     return {
       data: service.getAll(params),
-      tableConfig: getConfigFaturas().tableConfig
+      presentation: faturasPresentations().tableFaturas
     }
     
   }
@@ -38,7 +38,7 @@ class FaturasController {
 
     return {
       data: service.getAll(params),
-      tableConfig: getConfigFaturasAgrupadas().tableConfig
+      presentation: faturasPresentations().tableAgruapadas
     }
 
   }
