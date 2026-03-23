@@ -2,8 +2,10 @@
 
   const FormCobrancas = ({onClose, codCliente}) => {
 
-    const { data, isLoading, error } = useCobrancasView(codCliente)
-    const presentation = data?.response?.presentation || {}
+    const { data: cobrancaView, isLoading: loadingView, error: errorView } = useCobrancasView(codCliente)
+    const { mutate: enviarWhats, isLoading: enviandoMsg } = useSendWhatsApp()
+    
+    const presentation = cobrancaView?.response?.presentation || {}
 
     const [formData, setFormData] = React.useState({
       codCliente: '',
@@ -24,24 +26,25 @@
     };
 
     React.useEffect(() => {
-      if (data?.response) {
-        const { cliente, regua } = data?.response?.data
+      if (cobrancaView?.response) {
+        const { cliente, regua } = cobrancaView?.response?.data
         
         setFormData({
           codCliente: cliente.codCliente || '',
           cliente: cliente.cliente || '',
           email: cliente.email || '',
           telefone: cliente.telefone || '',
-
           fase: regua.faseRegua || '',
-
-          //canal: cobranca.canal || '',
-          //acao: cobranca.acao || '',
-          //status: cobranca.status || '',
         })
         
       }
-    }, [data])
+    }, [cobrancaView])
+
+    React.useEffect(() => {
+      if (window.lucide) {
+        window.lucide.createIcons();
+      }
+    },[formData.canal, enviandoMsg])
     
     return (
       <div className="drawer-cobranca" id="drawer-cobranca">
@@ -89,72 +92,96 @@
           <div className="conteiner-comunicacao">
             <Select
               options={presentation?.canais}
-              name={'canais'}
+              name={'canal'}
               label={'Canal'}
-              value={''}
-              onChange={() => alert('Teste')}
+              value={formData.canal}
+              onChange={handleInputChange}
             />
 
             <Select
               options={presentation?.acoes}
-              name={'acoes'}
+              name={'acao'}
               label={'Ação'}
-              value={''}
-              onChange={() => alert('Teste')}
+              value={formData.acaos}
+              onChange={handleInputChange}
             />
 
             <Select
               options={presentation?.status}
               name={'status'}
               label={'Status'}
-              value={''}
-              onChange={() => alert('Teste')}
+              value={formData.status}
+              onChange={handleInputChange}
             />
           </div>
 
-          <div id="container-whatsapp" className="hidden">
-            <label>WhatsApp</label>
-            <div className="conteiner-contatos">
-              <input
-                type="text"
-                name="telefone"
-                value={formData.telefone}
-                onChange={handleInputChange}
-                placeholder="Digite o número"
-              />
-              <a id="btnWhats" title="Abrir WhatsApp" className="icon-send" target="_blank" rel="noopener noreferrer" href="">
-                <i data-lucide="message-circle"></i>
-              </a>
+          {formData.canal === 'WHATSAPP' &&
+            <div id="container-whatsapp" className="hidden">
+              <label>WhatsApp</label>
+              <div className="conteiner-contatos">
+                <input
+                  type="text"
+                  name="telefone"
+                  value={formData.telefone}
+                  onChange={handleInputChange}
+                  placeholder="Digite o número"
+                />
+                <button 
+                  title="Abrir WhatsApp" 
+                  type="button"
+                  className="icon-send" 
+                  onClick={() => enviarWhats(formData)}
+                  disabled={enviandoMsg}
+                >
+                  {enviandoMsg ? (
+                    <span key="wrapper-loading"><Loading /></span>
+                  ) : (
+                    <span key="wrapper-icon"><i data-lucide="message-circle"></i></span>
+                  )}
+                </button>
+              </div>
             </div>
-          </div>
+          }
 
-          <div id="container-email" className="hidden">
-            <label>E-mails</label>
-            <div className="conteiner-contatos">
-              <input
-                type="text"
-                name="email"
-                value={formData.email}
-                onChange={handleInputChange}
-                placeholder="Digite o e-mail"
-              />
-              <button className="icon-send" data-action="sendEmail" id="btnSendEmail" title="Enviar E-mail">
-                <i data-lucide="send"></i>
-              </button>
+          {formData.canal === 'EMAIL' &&
+            <div id="container-email" className="hidden">
+              <label>E-mails</label>
+              <div className="conteiner-contatos">
+                <input
+                  type="text"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleInputChange}
+                  placeholder="Digite o e-mail"
+                />
+                <button
+                  title="Enviar E-mail"
+                  className="icon-send"
+                  onClick={() => console.log('Clicado EMAIL')}
+                >
+                  <i data-lucide="send"></i>
+                </button>
+              </div>
             </div>
-          </div>
+          }
 
           <div className="container-preview-faturas">
             <h3>Faturas vinculadas</h3>
             <Table
               presentation={presentation}
-              data={data?.response?.data?.faturas}
-              isLoading={isLoading}
+              data={cobrancaView?.response?.data?.faturas}
+              isLoading={loadingView}
             />
           </div>
 
           <div style={{ marginTop: 'auto', display: 'flex', gap: '8px' }}>
-            <button type="button" className="btn-primario" data-action="save" id="btn-salvarCobranca">
+            <button
+              type="button"
+              className="btn-primario"
+              data-action="save"
+              id="btn-salvarCobranca"
+              onClick={() => console.log(formData)}
+            >
               Salvar
             </button>
 
@@ -226,12 +253,20 @@
   }
 
   .icon-send {
-    display: flex;
-    padding: 5px;
+    width: 35px;
+    height: 35px;
+    
     color: black;
     background: none;
     border: none;
     cursor: pointer;
+  
+  }
+
+  .icon-send > span {
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   .is-disabled {

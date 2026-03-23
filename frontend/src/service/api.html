@@ -22,7 +22,14 @@
     return {
       get: (endpoint, filters = null) => {
         const url = filters ? `${endpoint}?${filters}` : endpoint;
-        return api({ url, method: 'GET' });
+        return api({ method: 'GET', url}
+        );
+      },
+
+      post: (url, body = {}) => {
+        return api(
+          {method: 'POST', url, body}
+        )
       }
     }
   }

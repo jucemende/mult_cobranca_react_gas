@@ -65,7 +65,7 @@ class CobrancasController {
   }
 
   static sendCharge({ data }) {
-    data.view = this.getView({ id: data.codCliente })
+    data.view = this.getView({ id: data.codCliente }).data
     return this._usesCases().sendChargeUseCase.send({ data })
   }
 

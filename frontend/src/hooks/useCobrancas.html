@@ -35,6 +35,18 @@
     });
   }
 
+  function useSendWhatsApp() {
+    return useMutation({
+      mutationFn: (body) => {
+        return googleFetch().post(`cobrancas-sendCharge`, body);
+      },
+      onSuccess: (response) => {
+        const { link } = response?.response;
+        if (link) window.open(link, '_blank');
+      }
+    });
+  }
+
 
 
 
