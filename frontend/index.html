@@ -31,20 +31,18 @@
     <script type="text/babel">
       
       const root = ReactDOM.createRoot(document.getElementById('root'));
-      const { QueryClient, QueryClientProvider } = window.ReactQuery;
-      const { useQuery, useMutation, useQueryClient } = window.ReactQuery;
+     
+      const { QueryClient, QueryClientProvider, useQuery, useMutation, useQueryClient } = window.ReactQuery;
+
       const queryClient = new QueryClient({
         defaultOptions: {
           queries: {
-            // Se uma busca falhar, avisa o usuário
             onError: (err) => showToast("Erro ao carregar dados: " + err.message, "error"),
           },
           mutations: {
-            // Sempre que um 'save' ou 'delete' der certo
             onSuccess: () => showToast("Operação realizada com sucesso!", "success"),
-            // Sempre que um 'save' falhar
             onError: (err) => showToast("Falha na operação: " + err.message, "error"),
-          }
+          },
         }
       });
 

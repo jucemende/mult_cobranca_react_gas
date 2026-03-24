@@ -4,7 +4,8 @@
 
     const { data: cobrancaView, isLoading: loadingView, error: errorView } = useCobrancasView(codCliente)
     const { mutate: enviarWhats, isLoading: enviandoMsg } = useSendWhatsApp()
-    
+    const { mutate: enviarEmail, isLoading: enviandoEmail } = useSendEmail()
+
     const presentation = cobrancaView?.response?.presentation || {}
 
     const [formData, setFormData] = React.useState({
@@ -44,7 +45,7 @@
       if (window.lucide) {
         window.lucide.createIcons();
       }
-    },[formData.canal, enviandoMsg])
+    },[formData.canal, enviandoMsg, enviandoEmail])
     
     return (
       <div className="drawer-cobranca" id="drawer-cobranca">
@@ -156,16 +157,22 @@
                 />
                 <button
                   title="Enviar E-mail"
+                  type="button"
                   className="icon-send"
-                  onClick={() => console.log('Clicado EMAIL')}
+                  onClick={() => enviarEmail(formData)}
+                  disabled={enviandoEmail}
                 >
-                  <i data-lucide="send"></i>
+                  {enviandoEmail ? (
+                    <span key="wrapper-loading"><Loading /></span>
+                  ) : (
+                    <span key="wrapper-icon"><i data-lucide="send"></i></span>
+                  )}
                 </button>
               </div>
             </div>
           }
 
-          <div className="container-preview-faturas">
+          <div style={{ display: 'flex', flexDirection: 'column', overflowY: 'hidden', height: '100%' }}>
             <h3>Faturas vinculadas</h3>
             <Table
               presentation={presentation}
@@ -218,7 +225,7 @@
     flex-direction: column;
     padding: 16px;
     gap: 16px;
-    height: 100vw;
+    height: 100vh;
   }
 
   .form-cobranca h3 {
