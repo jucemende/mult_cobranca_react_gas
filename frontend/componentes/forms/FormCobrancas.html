@@ -1,7 +1,8 @@
 <script type="text/babel">
 
-  const FormCobrancas = ({onClose, codCliente}) => {
+  const FormCobrancas = ({onClose, record}) => {
 
+    const { codCliente } = record
     const { data: cobrancaView, isLoading: loadingView, error: errorView } = useCobrancasView(codCliente)
     const { mutate: enviarWhats, isLoading: enviandoMsg } = useSendWhatsApp()
     const { mutate: enviarEmail, isLoading: enviandoEmail } = useSendEmail()

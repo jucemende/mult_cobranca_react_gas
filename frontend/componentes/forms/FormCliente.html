@@ -1,8 +1,10 @@
 <script type="text/babel">
 
-  const FormCliente = ({onClose, id}) => {
+  const FormCliente = ({onClose, record}) => {
 
     const [tipoPessoa, setTipoPessoa] = React.useState('CNPJ')
+    
+    const id = record.clienteId
     const { data, isLoading, error } = useClientes(id);
     
     const [formData, setFormData] = React.useState({

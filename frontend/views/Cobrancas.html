@@ -2,96 +2,39 @@
   const Cobrancas = () => {
     
     const [abaAtiva, setAbaAtiva] = React.useState('clientes')
-    const [recordBusca, setRecordBusca] = React.useState(null)
-    const [isEdition, setIsEdition] = React.useState(false)
-    const [isCobrar, setIsCobrar] = React.useState(false)
-    const [isFilter, setIsFilter] = React.useState(false)
+    const [activeModal, setActiveModal] = React.useState(null)
 
-    const debounceRef = React.useRef(null)
-
-    const [filtrosAtivos, setFiltrosAtivos] = React.useState({})
-    const [filtroDebounced, setFiltroDebounced] = React.useState('')
-
-    const { data, isLoading, error } = useCobrancas(abaAtiva, filtroDebounced)
-
+    const { data, isLoading } = useCobrancas(abaAtiva)
     const presentation = data?.response?.presentation || {}
 
-    const openForms = (item) => {
-      switch (abaAtiva) {
-        case 'clientes':
-          setRecordBusca(item.clienteId)
-          setIsEdition(true)
-          break
-        case 'faturas':
-        case 'pendencias':
-          setIsEdition(true)
-          break
-        default:
-          break
-      }
+    // Renderização de tabs
+    const tabs = [
+      {key: 'clientes',label: 'Clientes'},
+      {key: 'faturas',label: 'Faturas'},
+      {key: 'pendencias',label: 'Pendencias'}
+    ]
+
+    // Funções de navegação de tabs
+    const handleClickTab = (tab) => {
+      setAbaAtiva(tab)
+      setActiveModal(null)
     }
 
-    // debounce isolado do input
-    const handleChange = (value) => {
-      if (debounceRef.current) {
-        clearTimeout(debounceRef.current)
-      }
+    // Renderização de totalizadores
+    const minDash = [
+      {label: 'Em Aberto', value: 'R$ 0,00'}, // passar o retorno do backend
+      {label: 'Baixadas', value: 'R$ 0,00'},
+      {label: 'Cobradas', value: 'R$ 0,00'},
+      {label: 'Última Atualização', value: '01/01/1900', class: 'label-atualizacao'}
+    ]
 
-      debounceRef.current = setTimeout(() => {
-        setFiltrosAtivos(prev => {
-          const novo = { ...prev }
-
-          if (value && value.trim() !== '') {
-            novo.search = { op: '=', value }
-          } else {
-            delete novo.search
-          }
-
-          return novo
-        })
-      }, 600)
+    // Função responsavel por lidar com os forms
+    const handleAction = ({ modal, record }) => {
+      setActiveModal({ modal, record })
     }
-
-    // monta query string sem mutar estado
-    React.useEffect(() => {
-      const queryString = Object.keys(filtrosAtivos)
-        .filter(key => {
-          const v = filtrosAtivos[key]?.value
-          return v && v.toString().trim() !== ''
-        })
-        .map(key => {
-          const { value, op } = filtrosAtivos[key]
-          return `${encodeURIComponent(key)}${op}${value}`
-        })
-        .join('&')
-
-      setFiltroDebounced(queryString)
-    }, [filtrosAtivos])
-
-    const handleApplyFiltros = (dadosDoForm) => {
-      setFiltrosAtivos(prev => ({
-        ...prev,
-        ...dadosDoForm
-      }))
-      setIsFilter(false)
-    }
-
-    const handleClearFiltros = () => {
-      setFiltrosAtivos(prev => {
-        return prev.search ? { search: prev.search } : {}
-      })
-      setIsFilter(false)
-    }
-
-    // executa apenas quando necessário
-    React.useEffect(() => {
-      if (window.lucide) {
-        window.lucide.createIcons()
-      }
-    }, [isCobrar, isEdition, isFilter])
 
     return (
-      <div>
+      <>
         <div className="conteiner-titulo-pag">
           <div id="conteiner-title-pag">
             <h1>Gestão de Cobranças</h1>
@@ -107,47 +50,24 @@
         </div>
 
         <div className="conteiner-btn-seguimentacao">
-          <button 
-            className={`btn-seguimentoRegua ${abaAtiva === 'clientes' ? 'ativo' : ''}`}
-            onClick={() => {setAbaAtiva('clientes'), setIsEdition(false), setIsCobrar(false)}}
-          >
-            <span>Clientes</span>
-          </button>
-
-          <button
-            className={`btn-seguimentoRegua ${abaAtiva === 'faturas' ? 'ativo' : ''}`}
-            onClick={() => {setAbaAtiva('faturas'), setIsEdition(false), setIsCobrar(false)}}
-          >
-            <span>Faturas</span>
-          </button>
-
-          <button
-            className={`btn-seguimentoRegua ${abaAtiva === 'pendencias' ? 'ativo' : ''}`}
-            onClick={() => {setAbaAtiva('pendencias'), setIsEdition(false), setIsCobrar(false)}}
-          >
-            <span>Pendências</span>
-          </button>
+          {tabs.map(tab => (
+            <button
+              key={tab.key}
+              className={`btn-seguimentoRegua ${abaAtiva === tab.key ? 'ativo' : ''}`}
+              onClick={() => handleClickTab(tab.key)}
+            >
+              <span>{tab.label}</span>
+            </button>
+          ))}
         </div>
 
         <div class="conteiner-totais-seguimentacao">
-
-          <div class="totais-seguimentacao">
-            <p class="label-totais">Em Aberto</p>
-            <p id="totalAberto" class="campo-totais">R$ 0,00</p>
-          </div>
-          <div class="totais-seguimentacao">
-            <p class="label-totais">Baixadas</p>
-            <p id="totalBaixado" class="campo-totais">R$ 0,00</p>
-          </div>
-          <div class="totais-seguimentacao">
-            <p class="label-totais">Cobradas</p>
-            <p id="totalCobrado" class="campo-totais">R$ 0,00</p>
-          </div>
-          <div class="totais-seguimentacao">
-            <p class="label-atualizacao">Última Atualização</p>
-            <p id="dtUltimaAtualizacao">01/01/1900</p>
-          </div>
-
+          {minDash.map(item => (
+            <div className="totais-seguimentacao">
+              <p className={item?.class ||  "label-totais"}>{item.label}</p>
+              <p className="campo-totais">{item.value}</p>
+            </div>
+          ))}
         </div>
 
         <div className="container-filtros">
@@ -156,7 +76,6 @@
             <input
               className="input-buscaAvancada"
               placeholder="Buscar..."
-              onChange={(e) => handleChange(e.target.value)}
             />
           </div>
 
@@ -164,12 +83,10 @@
             <button 
               type="button"
               className="btn-secundario"
-              enabled={isLoading}
-              onClick={() => setIsFilter(true)}
             >
               Filtros
               <i data-lucide="funnel"></i>
-              <div className="count-filtros" id="count-filtros">{Object.keys(filtrosAtivos).length}</div>
+              <div className="count-filtros" id="count-filtros">0</div>
             </button>
 
             <div className="container-filtrado" id="tagsFiltradas"></div>
@@ -180,35 +97,19 @@
           presentation={presentation}
           data={data?.response?.data || []}
           isLoading={isLoading}
-          actionHandlers={{
-            edit: (item) => openForms(item),
-            cobrar: (item) => {
-              setRecordBusca(item.codCliente)
-              setIsCobrar(true)
-            }
-          }}
+          actionHandlers={handleAction}
+          activeModal={activeModal}
         />
 
-        { isEdition && (
-          <>
-            {abaAtiva === 'clientes' &&(
-              <FormCliente onClose={() => setIsEdition(false)} id={recordBusca}/>
-            )}
-          </>
-        )}
-
-        { isCobrar && <FormCobrancas onClose={() => setIsCobrar(false)} codCliente={recordBusca} /> }
-        { isFilter && 
-          <FormFiltro 
-            onClose={() => setIsFilter(false)}
-            currentValues={filtrosAtivos}
-            filters={presentation?.filters} 
-            onApply={handleApplyFiltros} 
-            onClear={handleClearFiltros}
-          /> 
+        {activeModal?.modal === `edit-${abaAtiva}` &&
+          <FormCliente onClose={() => setActiveModal(null)} record={activeModal?.record}/>
         }
 
-      </div>
+        {activeModal?.modal === `cobrar` &&
+          <FormCobrancas onClose={() => setActiveModal(null)} record={activeModal?.record} />
+        }
+
+      </>
     );
   }
 </script>

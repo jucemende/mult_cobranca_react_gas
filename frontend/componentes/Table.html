@@ -2,14 +2,14 @@
 
   const { useEffect } = React;
 
-  const Table = ({ presentation = {}, data = [], actionHandlers = {}, isLoading = false }) => {
+  const Table = ({ presentation = {}, data = [], actionHandlers = {}, isLoading = false, activeModal }) => {
     const { tableHeaders = [], actions = [] } = presentation;
 
     useEffect(() => {
       if (window.lucide) {
         window.lucide.createIcons();
       }
-    }, [data, presentation, isLoading]);
+    }, [data, presentation, isLoading, activeModal]);
 
     if (isLoading) {
       return <Loading />;
@@ -78,7 +78,7 @@
                             key={action.type}
                             title={action.title}
                             className={`table-action-btn ${action.className || ''}`}
-                            onClick={() => actionHandlers[action.type]?.(row)}
+                            onClick={() => actionHandlers({modal: action.type, record: row})} 
                           >
                             <i data-lucide={action.icon}></i>
                           </button>
