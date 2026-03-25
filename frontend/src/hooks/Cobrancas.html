@@ -5,17 +5,17 @@
     pendencias: 'cobrancas-list'
   }
 
-  function useCobrancas(aba) {
+  function useCobrancas(aba, filters = null) {
     return useQuery({
-      queryKey: ['cobranca', aba],
+      queryKey: ['cobranca', aba, filters],
       queryFn: () => {
-        const endpoint = rotas[aba]
+        let endpoint = rotas[aba]
 
         if (!endpoint) {
           throw new Error(`Rota ${aba} não configurada.`);
         }
-        
-        return googleFetch().get(endpoint)
+
+        return googleFetch().get(endpoint, filters)
         
       },
       refetchOnWindowFocus: false,

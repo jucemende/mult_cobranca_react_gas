@@ -1,64 +1,64 @@
 <script type="text/babel">
 
-  const Filtro = ({config = []}) => {
+  const FormFiltro = ({filters = [], currentValues = {}, onClose, onApply, onClear}) => {
 
-    function renderField(field) {
-      switch (field.element) {
-
-        case 'input':
-          return (
-            <div>
-              <label>{field.label}</label>
-              <input 
-                type={field.type}
-                name={field.name}
-              >
-              </input>
-            </div>
-          )
-        
-        case 'select':
-          return (
-            <div className="select-wrapper">
-              <label>{field.label}</label>
-              <select name={field.name}>
-                <option value="">Selecione</option>
-                {field.options.map(opt => (
-                  <option value={opt.value}>{opt.value}</option>
-                ))}
-              </select>
-            </div>
-          )
-
-        default:
-          return null
+    const [values, setValues] = React.useState(currentValues)
+    
+    const handleChange = (name, op, value) => {
+      if (!value) {
+        const newValues = { ...values };
+        delete newValues[name];
+        setValues(newValues);
+        return;
       }
+      setValues(prev => ({ ...prev, [name]: {op, value} }));
+    };
+
+    const renderField = (field) => {
+      
+      const filtro = values[field.name] || {}
+      const valorComOp = filtro.value || '';
+      const valorLimpo = field.op ? valorComOp.replace(field.op, '') : valorComOp;
+
+      return(
+
+        <div>
+          {field.element === 'select' && (
+            <Select
+              options={field.options}
+              name={field.name}
+              label={field.label}
+              value={valorLimpo}
+              onChange={(e) => handleChange(field.name, field.op || '=', e.target.value)}
+            />
+          )}
+        </div>
+
+      )
     }
-
-    React.useEffect(() => {
-      if (window.lucide) window.lucide.createIcons();
-      console.log(config)
-    }, []);
-
+    
     return (
       <div className="tela-filtros">
         <form className="form-filtros">
-
           <div className="conteiner-title-filters">
             <h1>Filtrar por</h1>
-            <button type="button">
-                <i data-lucide="x"></i>
+            <button
+              type="button"
+              onClick={onClose}
+            >
+              <i data-lucide="x"></i>
             </button>
           </div>
 
           <div className="conteiner-fields">
-            {config.map(renderField)}
+            {filters.map(renderField)}
           </div>
 
           <div className="conteiner-btnFiltros">
-            <button type="reset" class="btn-secundario">Limpar</button>
-            <button type="button" class="btn-primario">Filtrar</button>
+            <button type="reset" class="btn-secundario" onClick={() => {setValues({}); onClear();}}>Limpar</button>
+            <button type="button" class="btn-primario" onClick={() => onApply(values)}>Filtrar</button>
           </div>
+
         </form>
       </div>
     )

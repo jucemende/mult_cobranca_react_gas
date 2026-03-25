@@ -1,12 +1,21 @@
+function testFaturasPresentation() {
+}
+
 function faturasPresentations() {
 
   const { tipoDocumento } = getEnunsFatura()
-  
+  const {clientes, vendedores} = BootstrapIndex()
+
   const styles = {
     tipoDocumento: [
       {value: tipoDocumento.MENSALIDADE, className: 'color-green'},
       {value: tipoDocumento.REEMBOLSO, className: 'color-yellow'}
     ]
+  }
+
+  const enuns = {
+    clientes: Object.values(clientes()).map(i => ({key: i.cliente, value: i.cliente})),
+    vendedores: Object.values(vendedores()).map(i => ({key: i.vendedor, value: i.vendedor}))
   }
 
   /** Configurações para tabela de faturas */
@@ -48,6 +57,23 @@ function faturasPresentations() {
     actions: [
       { type: 'edit', title: "Editar", icon: 'square-pen' },
       { type: 'cobrar', title: "Cobrar", icon: 'hand-coins' }
+    ],
+
+    filters: [
+      {
+        element: 'select',
+        name: 'cliente',
+        label: 'Cliente',
+        options: enuns.clientes,
+        op: '='
+      },
+      {
+        element: 'select',
+        name: 'vendedor',
+        label: 'Vendedor',
+        options: enuns.vendedores,
+        op: '='
+      },
     ],
   }
 

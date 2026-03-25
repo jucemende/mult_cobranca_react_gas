@@ -17,10 +17,11 @@
       <?!= include("frontend/componentes/Loading"); ?>
       <?!= include("frontend/componentes/Table"); ?>
       <?!= include("frontend/componentes/Select"); ?>
-
+      
       <?!= include("frontend/componentes/forms/FormCliente"); ?>
       <?!= include("frontend/componentes/forms/FormCobrancas"); ?>
-      
+      <?!= include("frontend/componentes/forms/FormFiltro"); ?>
+
       <!-- VIEWS -->
       <?!= include("frontend/views/Dashboard"); ?>
       <?!= include("frontend/views/Cobrancas"); ?>
@@ -69,7 +70,7 @@
     </script>
 
     <?!= include("frontend/src/service/api"); ?>
-    <?!= include("frontend/src/hooks/useCobrancas"); ?>
-    <?!= include("frontend/src/hooks/useClientes"); ?>
+    <?!= include("frontend/src/hooks/Cobrancas"); ?>
+    <?!= include("frontend/src/hooks/Clientes"); ?>
   </body>
 </html>

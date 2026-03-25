@@ -28,7 +28,7 @@ class CobrancasUseCase {
     const clientes = this.boots.clientes()
     const reguas = this.boots.regua()
     
-    const rows = Object.keys(cobrancas).map(c =>{
+    let rows = Object.keys(cobrancas).map(c =>{
       const listCobranca = cobrancas[c]
       
       const ultima = listCobranca.sort((a, b) =>

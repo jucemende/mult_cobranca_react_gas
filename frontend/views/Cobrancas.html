@@ -5,23 +5,24 @@
     const [recordBusca, setRecordBusca] = React.useState(null)
     const [isEdition, setIsEdition] = React.useState(false)
     const [isCobrar, setIsCobrar] = React.useState(false)
-    
-    const { data, isLoading, error } = useCobrancas(abaAtiva);
+    const [isFilter, setIsFilter] = React.useState(false)
+
+    const debounceRef = React.useRef(null)
+
+    const [filtrosAtivos, setFiltrosAtivos] = React.useState({})
+    const [filtroDebounced, setFiltroDebounced] = React.useState('')
+
+    const { data, isLoading, error } = useCobrancas(abaAtiva, filtroDebounced)
 
     const presentation = data?.response?.presentation || {}
-    
-    //const mutation = useCreateFatura();
 
     const openForms = (item) => {
-
-      switch (abaAtiva)  {
+      switch (abaAtiva) {
         case 'clientes':
           setRecordBusca(item.clienteId)
           setIsEdition(true)
           break
         case 'faturas':
-          setIsEdition(true)
-          break
         case 'pendencias':
           setIsEdition(true)
           break
@@ -30,14 +31,67 @@
       }
     }
 
+    // debounce isolado do input
+    const handleChange = (value) => {
+      if (debounceRef.current) {
+        clearTimeout(debounceRef.current)
+      }
+
+      debounceRef.current = setTimeout(() => {
+        setFiltrosAtivos(prev => {
+          const novo = { ...prev }
+
+          if (value && value.trim() !== '') {
+            novo.search = { op: '=', value }
+          } else {
+            delete novo.search
+          }
+
+          return novo
+        })
+      }, 600)
+    }
+
+    // monta query string sem mutar estado
+    React.useEffect(() => {
+      const queryString = Object.keys(filtrosAtivos)
+        .filter(key => {
+          const v = filtrosAtivos[key]?.value
+          return v && v.toString().trim() !== ''
+        })
+        .map(key => {
+          const { value, op } = filtrosAtivos[key]
+          return `${encodeURIComponent(key)}${op}${value}`
+        })
+        .join('&')
+
+      setFiltroDebounced(queryString)
+    }, [filtrosAtivos])
+
+    const handleApplyFiltros = (dadosDoForm) => {
+      setFiltrosAtivos(prev => ({
+        ...prev,
+        ...dadosDoForm
+      }))
+      setIsFilter(false)
+    }
+
+    const handleClearFiltros = () => {
+      setFiltrosAtivos(prev => {
+        return prev.search ? { search: prev.search } : {}
+      })
+      setIsFilter(false)
+    }
+
+    // executa apenas quando necessário
     React.useEffect(() => {
       if (window.lucide) {
         window.lucide.createIcons()
       }
-    })
+    }, [isCobrar, isEdition, isFilter])
 
     return (
-      <>
+      <div>
         <div className="conteiner-titulo-pag">
           <div id="conteiner-title-pag">
             <h1>Gestão de Cobranças</h1>
@@ -102,14 +156,20 @@
             <input
               className="input-buscaAvancada"
               placeholder="Buscar..."
+              onChange={(e) => handleChange(e.target.value)}
             />
           </div>
 
           <div className="container-select-filtros">
-            <button className="btn-secundario">
+            <button 
+              type="button"
+              className="btn-secundario"
+              enabled={isLoading}
+              onClick={() => setIsFilter(true)}
+            >
               Filtros
               <i data-lucide="funnel"></i>
-              <div className="count-filtros" id="count-filtros">0</div>
+              <div className="count-filtros" id="count-filtros">{Object.keys(filtrosAtivos).length}</div>
             </button>
 
             <div className="container-filtrado" id="tagsFiltradas"></div>
@@ -138,7 +198,17 @@
         )}
 
         { isCobrar && <FormCobrancas onClose={() => setIsCobrar(false)} codCliente={recordBusca} /> }
-      </>
+        { isFilter && 
+          <FormFiltro 
+            onClose={() => setIsFilter(false)}
+            currentValues={filtrosAtivos}
+            filters={presentation?.filters} 
+            onApply={handleApplyFiltros} 
+            onClear={handleClearFiltros}
+          /> 
+        }
+
+      </div>
     );
   }
 </script>
