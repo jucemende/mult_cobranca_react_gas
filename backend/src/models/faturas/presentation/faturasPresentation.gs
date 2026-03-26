@@ -59,22 +59,33 @@ function faturasPresentations() {
       { type: 'cobrar', title: "Cobrar", icon: 'hand-coins' }
     ],
 
-    filters: [
+    filtersLayout: [
       {
+        type: 'row',
+        columns: 1,
+        children: [
+          { type: 'field', name: 'cliente' },
+          { type: 'field', name: 'vendedor' }
+        ]
+      }
+    ],
+
+    fields: {
+      cliente: {
         element: 'select',
         name: 'cliente',
         label: 'Cliente',
         options: enuns.clientes,
         op: '='
       },
-      {
+      vendedor: {
         element: 'select',
         name: 'vendedor',
         label: 'Vendedor',
         options: enuns.vendedores,
         op: '='
       },
-    ],
+    }
   }
 
   return {

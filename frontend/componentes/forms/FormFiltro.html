@@ -1,62 +1,105 @@
 <script type="text/babel">
 
-  const FormFiltro = ({filters = [], currentValues = {}, onClose, onApply, onClear}) => {
+  const FormFiltro = ({presentation = {}, currentValues = {}, onClose,onApply, onClear}) => {
 
+    const { filtersLayout = [], fields = {} } = presentation
     const [values, setValues] = React.useState(currentValues)
-    
+
     const handleChange = (name, op, value) => {
       if (!value) {
-        const newValues = { ...values };
-        delete newValues[name];
-        setValues(newValues);
-        return;
+        setValues(prev => {
+          const newValues = { ...prev }
+          delete newValues[name]
+          return newValues
+        })
+        return
       }
-      setValues(prev => ({ ...prev, [name]: {op, value} }));
-    };
 
-    const renderField = (field) => {
-      
-      const filtro = values[field.name] || {}
-      const valorComOp = filtro.value || '';
-      const valorLimpo = field.op ? valorComOp.replace(field.op, '') : valorComOp;
+      setValues(prev => ({...prev, [name]: { op, value }}))
+    }
 
-      return(
-
-        <div>
-          {field.element === 'select' && (
+    const FieldRenderer = React.useCallback(({ field, value, onChange }) => {
+      switch (field.element) {
+        case 'select':
+          return (
             <Select
               options={field.options}
               name={field.name}
               label={field.label}
-              value={valorLimpo}
-              onChange={(e) => handleChange(field.name, field.op || '=', e.target.value)}
+              value={value}
+              onChange={(e) =>
+                onChange(field.name, field.op || '=', e.target.value)
+              }
             />
-          )}
-        </div>
+          )
 
-      )
-    }
-    
+        default:
+          return null
+      }
+    }, [])
+
+    const renderLayout = React.useCallback((node) => {
+
+      if (node.type === 'row') {
+        return (
+          <div
+            key={node.id || JSON.stringify(node)}
+            className="row"
+            style={{
+              display: 'grid',
+              gridTemplateColumns: `repeat(${node.columns || 1}, 1fr)`,
+              gap: '12px'
+            }}
+          >
+            {node.children?.map(renderLayout)}
+          </div>
+        )
+      }
+
+      if (node.type === 'field') {
+        const field = fields[node.name]
+        if (!field) return null
+
+        const filtro = values[node.name] || {}
+
+        return (
+          <div key={node.name}>
+            <FieldRenderer
+              field={{ ...field, name: node.name }}
+              value={filtro.value || ''}
+              onChange={handleChange}
+            />
+          </div>
+        )
+      }
+
+      return null
+
+    }, [fields, values, handleChange, FieldRenderer])
+
     return (
       <div className="tela-filtros">
         <form className="form-filtros">
+          
           <div className="conteiner-title-filters">
             <h1>Filtrar por</h1>
-            <button
-              type="button"
-              onClick={onClose}
-            >
+            <button type="button" onClick={onClose}>
               <i data-lucide="x"></i>
             </button>
           </div>
 
           <div className="conteiner-fields">
-            {filters.map(renderField)}
+            {filtersLayout.map(renderLayout)}
           </div>
 
           <div className="conteiner-btnFiltros">
-            <button type="reset" class="btn-secundario" onClick={() => {setValues({}); onClear();}}>Limpar</button>
-            <button type="button" class="btn-primario" onClick={() => onApply(values)}>Filtrar</button>
+            <button type="reset" className="btn-secundario" onClick={onClear}>
+              Limpar
+            </button>
+
+            <button type="button" className="btn-primario" onClick={() => {onApply(values), onClose()}}>
+              Filtrar
+            </button>
           </div>
 
         </form>
@@ -92,6 +135,7 @@
   .form-filtros {
     background-color: white;
     min-width: 500px;
+    max-width: 700px;
     width: fit-content;
     padding: 20px;
     border-radius: 15px;

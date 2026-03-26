@@ -4,7 +4,17 @@
     const [abaAtiva, setAbaAtiva] = React.useState('clientes')
     const [activeModal, setActiveModal] = React.useState(null)
 
-    const { data, isLoading } = useCobrancas(abaAtiva)
+    const {
+      filtros,
+      setFiltro,
+      mergeFiltros,
+      clearFiltros,
+      queryString,
+      handleChange,
+      filtersApllyed
+    } = useFiltros(600)
+
+    const { data, isLoading } = useCobrancas(abaAtiva, queryString)
     const presentation = data?.response?.presentation || {}
 
     // Renderização de tabs
@@ -31,6 +41,18 @@
     // Função responsavel por lidar com os forms
     const handleAction = ({ modal, record }) => {
       setActiveModal({ modal, record })
+    }
+
+    // Função para lidar com o filtro avancado
+    const handleSearchChange = (value) => {
+      handleChange(value)
+    }
+
+    const handleClearFilters = () => {
+      setActiveModal(null)
+      if(Object.keys(filtersApllyed).length) {
+        clearFiltros()
+      }
     }
 
     return (
@@ -76,6 +98,7 @@
             <input
               className="input-buscaAvancada"
               placeholder="Buscar..."
+              onChange={(e) => handleSearchChange(e.target.value)}
             />
           </div>
 
@@ -83,10 +106,11 @@
             <button 
               type="button"
               className="btn-secundario"
+              onClick={() => setActiveModal('filtrar')}
             >
               Filtros
               <i data-lucide="funnel"></i>
-              <div className="count-filtros" id="count-filtros">0</div>
+              <div className="count-filtros" id="count-filtros">{Object.keys(filtersApllyed).length}</div>
             </button>
 
             <div className="container-filtrado" id="tagsFiltradas"></div>
@@ -107,6 +131,16 @@
 
         {activeModal?.modal === `cobrar` &&
           <FormCobrancas onClose={() => setActiveModal(null)} record={activeModal?.record} />
+        }
+
+        { activeModal === 'filtrar' &&
+          <FormFiltro 
+            onClose={() => setActiveModal(null)}
+            currentValues={filtros}
+            presentation={presentation} 
+            onApply={mergeFiltros} 
+            onClear={handleClearFilters}
+          /> 
         }
 
       </>
