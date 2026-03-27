@@ -57,11 +57,11 @@ class CobrancasUseCase {
 
   getView(faturas) {
 
-    if (!faturas.length)
-      throw new Error('Nenhuma fatura elegível para cobranças')
-
     const regua = this._getReguaPrincipal(faturas)
 
+    if (!faturas.length || !regua)
+      throw new Error('Nenhuma fatura elegível para cobranças')
+    
     return new CobrancaViewDTO(faturas, regua)
   }
 
@@ -97,16 +97,17 @@ class CobrancasUseCase {
   _getReguaPrincipal(faturas) {
 
     const reguas = this.serviceRegua.getAll()
-
     const reguasAplicadas = faturas
-      .map(f =>
-        reguas.find(r =>
+      .map(f => {
+        console.log(f.diasAtraso)
+        return reguas.find(r =>
           f.diasAtraso >= r.atrasoDe &&
           f.diasAtraso <= r.atrasoAte
         )
-      )
+      })
       .filter(Boolean)
 
+    console.log(reguasAplicadas)
     if (!reguasAplicadas.length)
       return null
 

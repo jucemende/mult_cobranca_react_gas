@@ -24,7 +24,7 @@ class CobrancasListDTO {
     this.cliente = cliente ?? null
     this.documento = ultima.documento
     this.qtdCobrancas = qtdCobrancas
-    this.dataContato = new Date(ultima.dataContato).toLocaleDateString()
+    this.dataContato = new Date(ultima.dataContato).toISOString()
     this.fase = fase
     this.canal = ultima.canal
     this.acao = ultima.acao

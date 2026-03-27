@@ -21,7 +21,10 @@
 
     return {
       get: (endpoint, filters = null) => {
-        const url = filters ? `${endpoint}?${filters}` : endpoint;
+        const url = filters 
+          ? `${endpoint}?${filters}` 
+          : endpoint;
+        
         return api({ method: 'GET', url}
         );
       },

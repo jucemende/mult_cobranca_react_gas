@@ -66,6 +66,10 @@
                       )
                     }
 
+                    if(col.date){
+                      return <td key={col.key}>{new Date(rawValue).toLocaleDateString()}</td>
+                    }
+
                     return <td key={col.key}>{rawValue}</td>;
                   })}
 

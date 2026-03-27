@@ -3,10 +3,21 @@
   const FormFiltro = ({presentation = {}, currentValues = {}, onClose,onApply, onClear}) => {
 
     const { filtersLayout = [], fields = {} } = presentation
+    const { search, ...filtersApllyed } = currentValues
     const [values, setValues] = React.useState(currentValues)
+    
+    const payload = {
+      ...values,
+      ...(search !== undefined && { search })
+    }
 
-    const handleChange = (name, op, value) => {
-      if (!value) {
+    const handleChange = (fieldsConfig, value) => {
+      
+      const isEmpty = value === '' || value === null || value === undefined
+      
+      const { name, op, field, type } = fieldsConfig
+      
+      if (isEmpty) {
         setValues(prev => {
           const newValues = { ...prev }
           delete newValues[name]
@@ -15,7 +26,7 @@
         return
       }
 
-      setValues(prev => ({...prev, [name]: { op, value }}))
+      setValues(prev => ({...prev, [name]: {field: field || name, type, op: op || '=', value }}))
     }
 
     const FieldRenderer = React.useCallback(({ field, value, onChange }) => {
@@ -28,9 +39,74 @@
               label={field.label}
               value={value}
               onChange={(e) =>
-                onChange(field.name, field.op || '=', e.target.value)
+                onChange(field, e.target.value)
               }
             />
+          )
+        
+        case 'input':
+          return (
+            <div>
+              <label>{field.label}</label>
+              <input
+                type={field.type || 'text'}
+                name={field.name}
+                value={value ?? ''}
+                onChange={(e) => {
+                  onChange(field, e.target.value)
+                }}
+              />
+            </div>
+          )
+        
+        case 'date':
+          return (
+            <div className="form-group">
+              <label>{field.label}</label>
+
+              <input
+                type="date"
+                name={field.name}
+                value={value ?? ''}
+                onChange={(e) => {
+                  const val = e.target.value
+          
+                  if (!val) {
+                    onChange(field, '')
+                    return
+                  }
+
+                  onChange(field, val)
+                }}
+              />
+            </div>
+          )
+        
+        case 'radio':
+          return (
+            <div>
+              <label>{field.label}</label>
+              <div className="radio-group">
+                
+                {field.options?.map((opt) => (
+                    <>
+                    <input
+                      id={opt.id}
+                      type="radio"
+                      className="info-form-Cliente"
+                      name={field.name}
+                      value={opt.value}
+                      checked={value === opt.value}
+                      onChange={(e) =>
+                        onChange(field, opt.value)
+                      }
+                    />
+                  <label htmlFor={opt.id} className="radio-label">{opt.label}</label>
+                  </>
+                ))}
+
+              </div>
+            </div>
           )
 
         default:
@@ -97,7 +173,7 @@
               Limpar
             </button>
 
-            <button type="button" className="btn-primario" onClick={() => {onApply(values), onClose()}}>
+            <button type="button" className="btn-primario" onClick={() => {onApply(payload), onClose()}}>
               Filtrar
             </button>
           </div>
@@ -250,6 +326,40 @@
   .ck-label:has(input[type="radio"]:checked) {
     background: var(--cor-verde-padrao);
     border: 1px solid var(--cor-verde-padrao);
+    color: white;
+  }
+
+  .radio-group {
+    display: flex;
+    gap: 10px;
+  }
+
+  .radio-group input[type="radio"],
+  .radio-group input[type="checkbox"] {
+    display: none;
+  }
+
+  .radio-label {
+    padding: 8px 16px;
+    border: 2px solid var(--cor-navebar);
+    border-radius: 8px;
+    cursor: pointer;
+    color: var(--cor-navebar);
+    font-weight: 600;
+    transition: background 0.3s;
+    user-select: none;
+  }
+
+  .radio-label:hover {
+    background: var(--cor-verde-padrao);
+    border: 2px solid var(--cor-verde-padrao);
+    color: white;
+  }
+
+  .radio-group input[type="radio"]:checked+.radio-label,
+  .radio-group input[type="checkbox"]:checked+.radio-label {
+    background: var(--cor-verde-padrao);
+    border: 2px solid var(--cor-verde-padrao);
     color: white;
   }
 </style>

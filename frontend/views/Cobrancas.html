@@ -106,7 +106,7 @@
             <button 
               type="button"
               className="btn-secundario"
-              onClick={() => setActiveModal('filtrar')}
+              onClick={() => setActiveModal({ modal: 'filtrar' })}
             >
               Filtros
               <i data-lucide="funnel"></i>
@@ -125,7 +125,7 @@
           activeModal={activeModal}
         />
 
-        {activeModal?.modal === `edit-${abaAtiva}` &&
+        {activeModal?.modal === 'edit-clientes' &&
           <FormCliente onClose={() => setActiveModal(null)} record={activeModal?.record}/>
         }
 
@@ -133,7 +133,7 @@
           <FormCobrancas onClose={() => setActiveModal(null)} record={activeModal?.record} />
         }
 
-        { activeModal === 'filtrar' &&
+        {activeModal?.modal === 'filtrar' &&
           <FormFiltro 
             onClose={() => setActiveModal(null)}
             currentValues={filtros}

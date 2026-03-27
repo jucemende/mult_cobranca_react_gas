@@ -32,7 +32,7 @@ class FaturasListDTO {
     this.email = cliente?.email ?? null
     this.telefone = cliente?.telefone ?? null
     this.idVendedor = cliente?.idVendedor ?? null
-    this.vencimento = new Date(faturas.vencimento).toLocaleDateString()
+    this.vencimento = new Date(faturas.vencimento).toISOString()
     this.status = faturas.status
     this.diasAtraso = faturas.diasAtraso
     this.vlrLiquido = this._parseValue(faturas.vlrLiquido)

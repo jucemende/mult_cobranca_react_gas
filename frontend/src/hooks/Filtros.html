@@ -43,7 +43,7 @@
 
     // Inclui os filtros expecificos ao query
     const mergeFiltros = (novos) => {
-      setFiltros(prev => ({ ...prev, ...novos }))
+      setFiltros(prev => ({ ...novos }))
     }
 
     // Apaga os filtros expecificos, mantém a busca avançada
@@ -51,6 +51,15 @@
       setFiltros(prev => {
         return prev.search ? { search: prev.search } : {}
       })
+    }
+
+    // Tratamento correto para date
+    const toUTCStartOfDay = (date) => {
+      return new Date(date + 'T00:00:00').toISOString()
+    }
+
+    const toUTCEndOfDay = (date) => {
+      return new Date(date + 'T23:59:59.999').toISOString()
     }
 
     // debounce global
@@ -62,10 +71,21 @@
     const queryString = React.useMemo(() => {
       return Object.keys(debounced)
         .map(key => {
-          const { op, value } = debounced[key]
-          return `${encodeURIComponent(key)}${op}${value}`
+          const { field, type, op, value } = debounced[key]
+
+          const fieldName = field || key
+
+          let finalValue = value
+          if (type === 'date') {
+            if (op === '>=') finalValue = toUTCStartOfDay(value)
+            if (op === '<=') finalValue = toUTCEndOfDay(value)
+          }
+
+          return `${encodeURIComponent(fieldName)}${op}${encodeURIComponent(finalValue)}`
+
         })
         .join('&')
+      
     }, [debounced])
 
     return {

@@ -23,7 +23,7 @@ function TesteApp() {
     }
   }
 
-  request = {url: 'faturas-agrupadas'}
+  request = {url: 'cobrancas-view/424'}
 
   const res = app(request)
 

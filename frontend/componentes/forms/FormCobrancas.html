@@ -2,6 +2,7 @@
 
   const FormCobrancas = ({onClose, record}) => {
 
+    console.log(record)
     const { codCliente } = record
     const { data: cobrancaView, isLoading: loadingView, error: errorView } = useCobrancasView(codCliente)
     const { mutate: enviarWhats, isLoading: enviandoMsg } = useSendWhatsApp()
