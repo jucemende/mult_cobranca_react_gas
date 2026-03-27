@@ -54,7 +54,7 @@ class SheetsCobrancasRepository extends CobrancasRepository {
       
     ];
 
-    const normalized = value.toUpperCase();
+    const normalized = String(value).toUpperCase();
 
     return rows.filter(row =>
       searchableFields.some(field =>

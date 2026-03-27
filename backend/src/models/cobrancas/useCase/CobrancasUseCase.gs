@@ -27,6 +27,7 @@ class CobrancasUseCase {
     const cobrancas = this.boots.cobrancas()
     const clientes = this.boots.clientes()
     const reguas = this.boots.regua()
+    const faturas = this.boots.faturas()
     
     let rows = Object.keys(cobrancas).map(c =>{
       const listCobranca = cobrancas[c]
@@ -41,7 +42,7 @@ class CobrancasUseCase {
 
       return new CobrancasListDTO(ultima, qtdCobrancas, cliente, fase)
 
-    })
+    }).filter(row => Boolean(faturas[row.documento])) // filtra apenas as cobranças com faturas abertas.
 
     if (search) {
       rows = this.repository.applyAdvancedSearch(rows, search[0].value);
