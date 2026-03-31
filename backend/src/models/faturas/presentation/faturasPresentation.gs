@@ -42,8 +42,8 @@ function faturasPresentations() {
 
     actions: [
       //{ type: 'edit', title: "Editar", icon: 'square-pen' },
-      { type: 'cobrar', title: "Cobrar", icon: 'hand-coins' },
       { type: 'delete', title: "Deletar", icon: 'trash-2' },
+      { type: 'cobrar', title: "Cobrar", icon: 'hand-coins' },
     ],
 
     filtersLayout: [
@@ -147,7 +147,7 @@ function faturasPresentations() {
 
     actions: [
       { type: 'edit-clientes', title: "Editar", icon: 'square-pen' },
-      { type: 'cobrar', title: "Cobrar", icon: 'hand-coins' }
+      { type: 'cobrar', title: "Cobrar", icon: 'hand-coins' },
     ],
 
     filtersLayout: [

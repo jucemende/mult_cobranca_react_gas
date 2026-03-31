@@ -15,7 +15,7 @@ function TestCobrancaRepository() {
   
   const repo = new SheetsCobrancasRepository
 
-  const cobrancas = repo.insert(data)
+  const cobrancas = repo.getById('47953')
 
   console.log(cobrancas)  
 }
@@ -26,7 +26,7 @@ class SheetsCobrancasRepository extends CobrancasRepository {
     super();
     this.db = new SQSheets({
       tableName: 'bdCobrancas',
-      idField: 'id'
+      idField: 'documento'
     });
   }
 
@@ -35,6 +35,15 @@ class SheetsCobrancasRepository extends CobrancasRepository {
     const rows = this.db.select()
     return rows.map(row => this._toEntity(row) );
 
+  }
+
+  getById(id) {
+    const rows = this.db.select(id)
+      .filter(r =>
+      String(r.documento) === String(id)
+    ) || null;
+
+    return rows.map(row => this._toEntity(row))
   }
 
   applyAdvancedSearch(rows = [], value = '') {

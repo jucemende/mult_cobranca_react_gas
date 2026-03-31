@@ -1,7 +1,7 @@
 function testControllerCobrancas() {
   const controller = CobrancasController
   
-  console.log(controller.getView({id: '6300'}))
+  console.log(controller.getAll({}))
 
 }
 
@@ -43,8 +43,18 @@ class CobrancasController {
   }
 
   static getAll({ id = null, params = {} }){
+    
+    const service = this._usesCases().cobrancasUseCase
+
+    if ( id ) {
+      return {
+        data: service.getById(id),
+        presentation: cobrancasPresentation().tableHistorico
+      }
+    }
+
     return {
-      data: this._usesCases().cobrancasUseCase.getAll(params),
+      data: service.getAll(params),
       presentation: cobrancasPresentation().tableCobrancas
     }
   }

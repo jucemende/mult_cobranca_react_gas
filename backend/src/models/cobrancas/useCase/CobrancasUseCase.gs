@@ -4,7 +4,7 @@ function TestCobrancasUseCase() {
     {cobrancasRepository: new SheetsCobrancasRepository()}
   )
 
-  const chargesView = serviceCharges.getAll()
+  const chargesView = serviceCharges.getById('47953')
 
   console.log(chargesView)
 
@@ -54,6 +54,25 @@ class CobrancasUseCase {
 
     return rows
     
+  }
+
+  getById( id ) {
+    if (!id) throw new Error('ID é obrigatório');
+    
+    const cobrancas = this.repository.getById(id)
+    if (!cobrancas) throw new Error('Registro não encontrado')
+
+    const clientes = this.boots.clientes()
+    const reguas = this.boots.regua()
+
+    let rows = cobrancas.map(c =>{
+      const fase = reguas[c.reguaId]?._faseRegua
+      const cliente = clientes[c.codCliente]?.cliente
+      
+      return new CobrancasListDTO(c, 0, cliente, fase)
+    })
+
+    return rows
   }
 
   getView(faturas) {

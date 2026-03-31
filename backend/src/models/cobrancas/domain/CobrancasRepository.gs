@@ -9,6 +9,10 @@ class CobrancasRepository {
     throw new Error('Método getAll() não implementado');
   }
 
+  getById(id, params) {
+    throw new Error('Método getById() não implementado');
+  }
+
   applyAdvancedSearch( rows, search ) {
     throw new Error('Método applyAdvancedSearch() não implementado');
   }

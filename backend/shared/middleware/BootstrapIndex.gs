@@ -1,9 +1,9 @@
 function testBootstrap(){
 
-  let faturas = BootstrapIndex().faturas()
+  let faturas = BootstrapIndex().cobrancas()
 
   //vendedores = Object.values(vendedores).map(i => ({key: i._id, value: i.vendedor}))
-  console.log(faturas['14188'])
+  console.log(faturas)
 
 }
 

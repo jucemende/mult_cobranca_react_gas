@@ -21,6 +21,7 @@
       <?!= include("frontend/componentes/forms/FormCliente"); ?>
       <?!= include("frontend/componentes/forms/FormCobrancas"); ?>
       <?!= include("frontend/componentes/forms/FormFiltro"); ?>
+      <?!= include("frontend/componentes/forms/FormHistorico"); ?>
 
       <!-- VIEWS -->
       <?!= include("frontend/views/Dashboard"); ?>
@@ -38,11 +39,11 @@
       const queryClient = new QueryClient({
         defaultOptions: {
           queries: {
-            onError: (err) => showToast("Erro ao carregar dados: " + err.message, "error"),
+            onError: (err) => showToast("Ops! " + err.message, "error"),
           },
           mutations: {
             onSuccess: () => showToast("Operação realizada com sucesso!", "success"),
-            onError: (err) => showToast("Falha na operação: " + err.message, "error"),
+            onError: (err) => showToast("Ops! " + err.message, "error"),
           },
         }
       });

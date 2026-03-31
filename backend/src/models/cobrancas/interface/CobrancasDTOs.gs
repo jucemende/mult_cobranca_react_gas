@@ -18,17 +18,18 @@ class CobrancasCreateDTO extends BaseDTO {
 }
 
 class CobrancasListDTO {
-  constructor (ultima, qtdCobrancas, cliente, fase) {
-    this.id = ultima._id
-    this.codCliente = ultima.codCliente
+  constructor (cobranca, qtdCobrancas, cliente, fase) {
+    this.id = cobranca._id
+    this.codCliente = cobranca.codCliente,
+    this.diasAtraso = cobranca.diasAtraso
     this.cliente = cliente ?? null
-    this.documento = ultima.documento
+    this.documento = cobranca.documento
     this.qtdCobrancas = qtdCobrancas
-    this.dataContato = new Date(ultima.dataContato).toISOString()
+    this.dataContato = new Date(cobranca.dataContato).toISOString()
     this.fase = fase
-    this.canal = ultima.canal
-    this.acao = ultima.acao
-    this.status = ultima.status
+    this.canal = cobranca.canal
+    this.acao = cobranca.acao
+    this.status = cobranca.status
   }
 }
 

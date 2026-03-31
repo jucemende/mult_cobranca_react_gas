@@ -43,6 +43,10 @@
       setActiveModal({ modal, record })
     }
 
+    const handleClose = () => {
+      setActiveModal(null)
+    };
+
     // Função para lidar com o filtro avancado
     const handleSearchChange = (value) => {
       handleChange(value)
@@ -126,21 +130,25 @@
         />
 
         {activeModal?.modal === 'edit-clientes' &&
-          <FormCliente onClose={() => setActiveModal(null)} record={activeModal?.record}/>
+          <FormCliente onClose={handleClose} record={activeModal?.record}/>
         }
 
         {activeModal?.modal === `cobrar` &&
-          <FormCobrancas onClose={() => setActiveModal(null)} record={activeModal?.record} />
+          <FormCobrancas onClose={handleClose} record={activeModal?.record} />
         }
 
         {activeModal?.modal === 'filtrar' &&
           <FormFiltro 
-            onClose={() => setActiveModal(null)}
+            onClose={handleClose}
             currentValues={filtros}
             presentation={presentation} 
             onApply={mergeFiltros} 
             onClear={handleClearFilters}
           /> 
+        }
+
+        {activeModal?.modal === 'history' &&
+          <FormHistorico record={activeModal?.record} onClose={handleClose} />
         }
 
       </>

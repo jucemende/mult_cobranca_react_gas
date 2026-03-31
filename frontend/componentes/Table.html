@@ -7,7 +7,10 @@
 
     useEffect(() => {
       if (window.lucide) {
-        window.lucide.createIcons();
+        setTimeout(() => {
+          const icons = document.querySelectorAll('td i[data-lucide]');
+          window.lucide.createIcons({ nodes: [...icons] });
+        }, 0);
       }
     }, [data, presentation, isLoading, activeModal]);
 
@@ -37,7 +40,8 @@
             ) : (
               data.map((row) => (
                 // Uso de row.id para melhor performance do React
-                <tr key={row.id || row.key || Math.random()}>
+                <tr key={row.id || row.codCliente || row.documento || index}>
+                
                   {tableHeaders.map(col => {
                     const rawValue = row[col.key];
 
@@ -81,8 +85,10 @@
                           <button
                             key={action.type}
                             title={action.title}
-                            className={`table-action-btn ${action.className || ''}`}
-                            onClick={() => actionHandlers({modal: action.type, record: row})} 
+                            className="table-action-btn"
+                            onClick={() => {
+                              actionHandlers({modal: action.type, record: row})} 
+                            }
                           >
                             <i data-lucide={action.icon}></i>
                           </button>
@@ -171,11 +177,11 @@
     height: 18px;
   }
 
-  .tabela-padrao button:hover {
-    background-color: var(--cor-verde-padrao);
+  .table-action-btn:hover {
+    background: var(--cor-verde-padrao);
   }
 
-  .tabela-padrao button:hover svg {
+  .table-action-btn:hover svg {
     color: white;
     stroke-width: 2;
   }

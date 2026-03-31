@@ -1,0 +1,56 @@
+<script type="text/babel">
+
+  const FormHistorico = ({onClose, record}) => {
+
+    const { documento } = record
+    
+    const { data, isLoading } = useHistorico(documento)
+    const presentation = data?.response?.presentation || {}
+        
+    return (
+      <div className="drawer-cobranca">
+        <form className="form-cobranca">
+          <h3>Histórico de Cobranças</h3>
+          <Table
+            presentation={presentation}
+            data={data?.response?.data || []}
+            isLoading={isLoading}
+          />
+
+          <div style={{marginTop: 'auto', display: 'flex', gap: '8px'}}>
+            <button type="button" className="btn-primario" onClick={onClose}>
+              Fechar
+            </button>
+          </div>
+        </form>
+      </div>
+    )
+  }
+</script>
+
+<style>
+  .form-cobranca {
+    display: flex;
+    flex-direction: column;
+    padding: 16px;
+    gap: 16px;
+    height: 100vw;
+  }
+
+  .drawer-cobranca {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 800px;
+    height: 100%;
+    background-color: #ffffff;
+    border-left: 1px solid #ddd;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    z-index: 11;
+    box-shadow: 2px 0 6px rgba(0, 0, 0, 0.2);
+    overflow: auto;
+  }
+</style>

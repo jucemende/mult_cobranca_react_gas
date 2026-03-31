@@ -60,8 +60,8 @@ function cobrancasPresentation() {
     ],
 
     actions: [
-      { type: 'cobrar', title: "Reabrir Cobrança", icon: 'hand-coins' },
-      { type: 'history', title: "Histórico Cobranças", icon: 'clipboard-clock' }
+      { type: 'history', title: "Histórico Cobranças", icon: 'clipboard-clock' },
+      { type: 'cobrar', title: "Cobrar", icon: 'hand-coins' },
     ],
 
     filtersLayout: [
@@ -156,8 +156,20 @@ function cobrancasPresentation() {
     }
   }
 
+  const tableHistorico = {
+    tableHeaders: [
+      {key: 'dataContato', label: 'Últ. Contato', date: true},
+      {key: 'diasAtraso', label: 'Atraso'},
+      {key: 'fase', label: 'Fase Atual'},
+      {key: 'canal', label: 'Últ. Canal'},
+      {key: 'acao', label: 'Últ. Ação'},
+      {key: 'status', label: 'Result. Contato', style: styles.statusCobranca},
+    ]
+  }
+
   return {
     viewCobranca,
-    tableCobrancas
+    tableCobrancas,
+    tableHistorico
   }
 }

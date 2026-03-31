@@ -2,11 +2,12 @@
 
   const FormCobrancas = ({onClose, record}) => {
 
-    console.log(record)
     const { codCliente } = record
     const { data: cobrancaView, isLoading: loadingView, error: errorView } = useCobrancasView(codCliente)
     const { mutate: enviarWhats, isLoading: enviandoMsg } = useSendWhatsApp()
     const { mutate: enviarEmail, isLoading: enviandoEmail } = useSendEmail()
+
+    const [isDisabled, setIsDisabled ] = React.useState(true)
 
     const presentation = cobrancaView?.response?.presentation || {}
 
@@ -39,18 +40,23 @@
           telefone: cliente.telefone || '',
           fase: regua.faseRegua || '',
         })
+
+        setIsDisabled(false)
         
       }
     }, [cobrancaView])
 
+    const formRef = React.useRef(null);
+
     React.useEffect(() => {
-      if (window.lucide) {
-        window.lucide.createIcons();
+      if (window.lucide && formRef.current) {
+        const icons = formRef.current.querySelectorAll('i[data-lucide]');
+        if (icons.length) window.lucide.createIcons({ nodes: [...icons] });
       }
-    },[formData.canal, enviandoMsg, enviandoEmail])
+    }, [formData.canal, enviandoMsg, enviandoEmail]);
     
     return (
-      <div className="drawer-cobranca" id="drawer-cobranca">
+      <div className="drawer-cobranca" id="drawer-cobranca" ref={formRef}>
         <form className="form-cobranca">
 
           <h3>Gerar Cobrança</h3>
@@ -188,7 +194,7 @@
               type="button"
               className="btn-primario"
               data-action="save"
-              id="btn-salvarCobranca"
+              disabled={isDisabled}
               onClick={() => console.log(formData)}
             >
               Salvar
@@ -276,9 +282,5 @@
     display: flex;
     align-items: center;
     justify-content: center;
-  }
-
-  .is-disabled {
-    color: #ccc
   }
 </style>

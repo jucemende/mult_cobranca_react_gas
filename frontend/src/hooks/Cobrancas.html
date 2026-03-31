@@ -25,6 +25,22 @@
     });
   }
 
+  function useHistorico(documento) {
+    return useQuery({
+      queryKey: ['historico', documento],
+      queryFn: () => {
+        let endpoint = `cobrancas-list/${documento}`
+
+        return googleFetch().get(endpoint)
+        
+      },
+      refetchOnWindowFocus: false,
+      staleTime: 1000 * 60 * 1,
+      retry: false,
+      enabled: !!documento
+    });
+  }
+
   function useCobrancasView(codCliente) {
     return useQuery({
       queryKey: ['cobranca-view', codCliente],
