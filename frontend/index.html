@@ -7,6 +7,7 @@
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@tanstack/react-query@4/build/umd/index.production.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 
     <script src="https://unpkg.com/lucide@latest"></script>
   </head>
@@ -36,7 +37,7 @@
      
       const { QueryClient, QueryClientProvider, useQuery, useMutation, useQueryClient } = window.ReactQuery;
 
-      const queryClient = new QueryClient({
+      window.queryClient = new QueryClient({
         defaultOptions: {
           queries: {
             onError: (err) => showToast("Ops! " + err.message, "error"),

@@ -4,8 +4,10 @@
 
     const { codCliente } = record
     const { data: cobrancaView, isLoading: loadingView, error: errorView } = useCobrancasView(codCliente)
+    
     const { mutate: enviarWhats, isLoading: enviandoMsg } = useSendWhatsApp()
     const { mutate: enviarEmail, isLoading: enviandoEmail } = useSendEmail()
+    const { mutate: saveCobranca, isLoading: savingCobranca } = useSaveCobranca(onClose)
 
     const [isDisabled, setIsDisabled ] = React.useState(true)
 
@@ -194,10 +196,13 @@
               type="button"
               className="btn-primario"
               data-action="save"
-              disabled={isDisabled}
-              onClick={() => console.log(formData)}
+              disabled={isDisabled || savingCobranca}
+              onClick={() => {
+                saveCobranca(formData)
+                setIsDisabled(false)
+              }}
             >
-              Salvar
+              {savingCobranca ? 'Salvando...' : 'Salvar'}
             </button>
 
             <button type="button" className="btn-secundario" onClick={onClose}>

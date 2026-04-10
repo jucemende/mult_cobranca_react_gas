@@ -37,7 +37,8 @@ const RouterRegistry = {
   vendedors: VendedorRouters,
   clientes: ClienteRouters,
   faturas: FaturasRouters,
-  cobrancas: CobrancasRouters
+  cobrancas: CobrancasRouters,
+  dashboard:  DashboardRouters,
 };
 
 function app(request) {
