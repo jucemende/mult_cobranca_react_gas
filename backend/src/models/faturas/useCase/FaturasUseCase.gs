@@ -24,31 +24,23 @@ class FaturasUseCase {
     this.boots = BootstrapIndex()
   }
 
-  getAll( params = {} ) {
-    
-    const search = params.search
-
-    const faturas = this.repository.getAll()
-    
-    const clientes = this.boots.clientes()
-    const cobrancas = this.boots.cobrancas()
-    const { taxaJuros, taxaMulta } = this._getEncargos()
+  getAll(params = {}) {
+    const search = params.search;
+    const faturas = this.repository.getAll();
+    const clientes = this.boots.clientes();
+    const cobrancas = this.boots.cobrancas();
+    const { taxaJuros, taxaMulta } = this._getEncargos();
 
     let rows = faturas.map(f => {
-      
-      if(cobrancas[f.documento]?.length) f.cobrado = true
+      if (cobrancas[f.documento]?.length) f.cobrado = true;
 
       const encargo = f.diasAtraso > 0 && f.possuiEncargos
-        ? f.calcularEncargos({
-          taxaJuros,
-          taxaMulta
-        })
-        : null
-      
-      return new FaturasListDTO(f, clientes[f.codCliente], encargo)
+        ? f.calcularEncargos({ taxaJuros, taxaMulta })
+        : null;
 
-    })
-    
+      return new FaturasListDTO(f, clientes[f.codCliente], encargo);
+    });
+
     if (search) {
       rows = this.repository.applyAdvancedSearch(rows, search[0].value);
     }
@@ -57,9 +49,26 @@ class FaturasUseCase {
       rows = this.repository.applyFilters(rows, params);
     }
 
-    return rows;
-    
+    // Função para converter "R$ 1.250,50" em 1250.50
+    const parseCurrency = (val) => {
+      if (typeof val === 'number') return val;
+      if (!val) return 0;
+      const cleanValue = val.toString()
+        .replace(/[R$\s.]/g, '') // Remove R$, espaços e pontos de milhar
+        .replace(',', '.');       // Troca vírgula decimal por ponto
+      return parseFloat(cleanValue) || 0;
+    }
+
+    const totais = rows.reduce((acc, row) => ({
+      vlrLiquido: acc.vlrLiquido + parseCurrency(row.vlrLiquido),
+      multa: acc.multa + parseCurrency(row.multa),
+      juros: acc.juros + parseCurrency(row.juros),
+      total: acc.total + parseCurrency(row.total)
+    }), { vlrLiquido: 0, multa: 0, juros: 0, total: 0 });
+
+    return { data: rows, totais };
   }
+
 
   getById( id ) {
     if (!id) throw new Error('ID é obrigatório');

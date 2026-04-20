@@ -17,6 +17,12 @@
     const { data, isLoading } = useCobrancas(abaAtiva, queryString)
     const presentation = data?.response?.presentation || {}
 
+    // Totais enviados pelo backend
+    const totais = data?.response?.totais || { vlrLiquido: 0, multa: 0, juros: 0, total: 0 };
+
+    const formatCurrency = (value) =>
+      value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+
     // Renderização de tabs
     const tabs = [
       {key: 'clientes',label: 'Clientes'},
@@ -36,6 +42,14 @@
       {label: 'Baixadas', value: 'R$ 0,00'},
       {label: 'Cobradas', value: 'R$ 0,00'},
       {label: 'Última Atualização', value: '01/01/1900', class: 'label-atualizacao'}
+    ]
+
+    // Totais do rodapé
+    const totaliserRodape = [
+      {label: 'Valor Líquido', value: formatCurrency(totais.vlrLiquido)},
+      {label: 'Multa', value: formatCurrency(totais.multa)},
+      {label: 'Juros', value: formatCurrency(totais.juros)},
+      {label: 'Total', value: formatCurrency(totais.total)}
     ]
 
     // Função responsavel por lidar com os forms
@@ -128,6 +142,28 @@
           actionHandlers={handleAction}
           activeModal={activeModal}
         />
+
+        
+        {abaAtiva != 'pendencias' &&
+          <div className="totais-container">
+            <div>
+              <p className="caption">Valor Líquido</p>
+              <p id="totalOriginal-fatura">{formatCurrency(totais.vlrLiquido)}</p>
+            </div>
+            <div>
+              <p className="caption">Multa</p>
+              <p id="totalMulta-fatura">{formatCurrency(totais.multa)}</p>
+            </div>
+            <div>
+              <p className="caption">Juros</p>
+              <p id="totalJuros-fatura">{formatCurrency(totais.juros)}</p>
+            </div>
+            <div>
+              <p className="caption">Total</p>
+              <p id="totalGeral-fatura">{formatCurrency(totais.total)}</p>
+            </div>
+          </div>
+        }
 
         {activeModal?.modal === 'edit-clientes' &&
           <FormCliente onClose={handleClose} record={activeModal?.record}/>
@@ -346,5 +382,21 @@
 
   .campo-totais {
     font-weight: 500;
+  }
+
+  .totais-container div:not(:last-child) {
+    border-right: 1px solid rgba(76, 175, 80, 0.15);
+  }
+
+  .caption {
+    margin-bottom: 6px;
+  }
+
+  @media (max-width: 850px) {
+    .totais-container {
+      flex-wrap: wrap;
+      height: auto;
+      padding: 10px 0;
+    }
   }
 </style>

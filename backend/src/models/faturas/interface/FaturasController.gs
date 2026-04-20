@@ -21,8 +21,10 @@ class FaturasController {
       }
     }
     
+    const result = service.getAll(params)
     return {
-      data: service.getAll(params),
+      data: result.data,
+      totais: result.totais,
       presentation: faturasPresentations().tableFaturas
     }
     
@@ -36,8 +38,10 @@ class FaturasController {
       return service.getById(id)
     }
 
+    const result = service.getAll(params)
     return {
-      data: service.getAll(params),
+      data: result.data,
+      totais: result.totais,
       presentation: faturasPresentations().tableAgruapadas
     }
 
