@@ -35,9 +35,9 @@ function getEnunsRegua() {
     faseRegua: {
       PREVENTIVA: 'PREVENTIVA',
       LEVE: 'LEVE',
-      MEDIA: 'MÉDIA',
+      MEDIA: 'MEDIA',
       ALTA: 'ALTA',
-      CRITICA: 'CRÍTICA'
+      CRITICA: 'CRITICA'
     }
   }
 }

@@ -63,7 +63,9 @@ class ClienteService {
 
   create(data) {
 
-    const props = Object.assign({}, schemaDomainCliente(), data);
+    const props = Object.assign({}, schemaDomainCliente(), data, {
+      idVendedor: data.idVendedor ?? data.vendedorId
+    });
 
     const cliente = Cliente.criar(props)
     
@@ -77,6 +79,9 @@ class ClienteService {
   }
 
   update(id, data) {
+    if (data.vendedorId && !data.idVendedor) {
+      data.idVendedor = data.vendedorId;
+    }
 
     if (!id) throw new Error('ID é obrigatório');
 

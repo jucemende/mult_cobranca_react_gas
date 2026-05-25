@@ -1,0 +1,76 @@
+<!-- frontend/src/hooks/Configuracoes.html -->
+<script>
+
+  const rotasConfig = {
+    regua:    'reguas',
+    encargos: 'encargos'
+  }
+
+  function useConfigList(aba, filters = null) {
+    return useQuery({
+      queryKey: ['config', aba, filters],
+      queryFn: () => googleFetch().get(rotasConfig[aba], filters),
+      refetchOnWindowFocus: false,
+      staleTime: 1000 * 60 * 5,
+      retry: false,
+      enabled: !!rotasConfig[aba]
+    })
+  }
+
+  // ── Régua ──────────────────────────────────────────────────────────────────
+
+  function useSaveRegua(onClose) {
+    return useMutation({
+      mutationFn: (body) => {
+        return body.id
+          ? googleFetch().put(`reguas/${body.id}`, body)
+          : googleFetch().post('reguas', body)
+      },
+      onSuccess: async () => {
+        showToast("Operação realizada com sucesso!", "success")
+        await window.queryClient.invalidateQueries({ queryKey: ['config'] })
+        onClose()
+      }
+    })
+  }
+
+  function useDeleteRegua(onClose) {
+    return useMutation({
+      mutationFn: (id) => googleFetch().delete(`reguas/${id}`),
+      onSuccess: async () => {
+        showToast("Régua excluída com sucesso!", "success")
+        await window.queryClient.invalidateQueries({ queryKey: ['config'] })
+        onClose()
+      }
+    })
+  }
+
+  // ── Encargos ───────────────────────────────────────────────────────────────
+
+  function useSaveEncargo(onClose) {
+    return useMutation({
+      mutationFn: (body) => {
+        return body.id
+          ? googleFetch().put(`encargos/${body.id}`, body)
+          : googleFetch().post('encargos', body)
+      },
+      onSuccess: async () => {
+        showToast("Operação realizada com sucesso!", "success")
+        await window.queryClient.invalidateQueries({ queryKey: ['config'] })
+        onClose()
+      }
+    })
+  }
+
+  function useDeleteEncargo(onClose) {
+    return useMutation({
+      mutationFn: (id) => googleFetch().delete(`encargos/${id}`),
+      onSuccess: async () => {
+        showToast("Encargo excluído com sucesso!", "success")
+        await window.queryClient.invalidateQueries({ queryKey: ['config'] })
+        onClose()
+      }
+    })
+  }
+
+</script>

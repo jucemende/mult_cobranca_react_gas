@@ -17,7 +17,7 @@ class ReguaCreateDTO extends BaseDTO {
     this.id = id
     this.faseRegua = this._isString(faseRegua, 'Nome')
     this.titulo = titulo
-    this.atrasode = this._isNumber(atrasoDe, "Atraso de")
+    this.atrasoDe = this._isNumber(atrasoDe, "Atraso de")
     this.atrasoAte = this._isNumber(atrasoAte, "Atraso até")
     this.permiteBloqueio = permiteBloqueio
     this.acoesRegua = acoesRegua

@@ -1,0 +1,115 @@
+<script>
+  const useFiltros = (delay = 600) => {
+    const [filtros, setFiltros] = React.useState({})
+    const [debounced, setDebounced] = React.useState({})
+    
+    const { search, ...filtersApllyed } = filtros
+    const debounceRef = React.useRef(null)
+
+    // Função debouce para searchs
+    const handleChange = (value) => {
+      if (debounceRef.current) {
+        clearTimeout(debounceRef.current)
+      }
+
+      debounceRef.current = setTimeout(() => {
+        setFiltros(prev => {
+          const novo = { ...prev }
+
+          if (value && value.trim() !== '') {
+            novo.search = { op: '=', value }
+          } else {
+            delete novo.search
+          }
+
+          return novo
+        })
+      }, delay)
+    }
+
+    const setFiltro = (name, op, value) => {
+      setFiltros(prev => {
+        const novo = { ...prev }
+
+        if (!value || value.toString().trim() === '') {
+          delete novo[name]
+        } else {
+          novo[name] = { op, value }
+        }
+
+        return novo
+      })
+    }
+
+    // Inclui os filtros expecificos ao query
+    const mergeFiltros = (novos) => {
+      setFiltros(prev => ({ ...novos }))
+    }
+
+    // Apaga os filtros expecificos, mantém a busca avançada
+    const clearFiltros = () => {
+      setFiltros(prev => {
+        return prev.search ? { search: prev.search } : {}
+      })
+    }
+
+    // Tratamento correto para date
+    const toUTCStartOfDay = (date) => {
+      return new Date(date + 'T00:00:00').toISOString()
+    }
+
+    const toUTCEndOfDay = (date) => {
+      return new Date(date + 'T23:59:59.999').toISOString()
+    }
+
+    // debounce global
+    React.useEffect(() => {
+      setDebounced(filtros)
+    }, [filtros])
+
+    // Função que monda a query da busca
+    const queryString = React.useMemo(() => {
+      return Object.keys(debounced)
+        .map(key => {
+          const { field, type, op, value } = debounced[key]
+
+          const fieldName = field || key
+
+          // Se o valor é um array (checkboxes), cria múltiplos parâmetros
+          if (Array.isArray(value)) {
+            return value.map(v => {
+              let finalValue = v
+              if (type === 'date') {
+                if (op === '>=') finalValue = toUTCStartOfDay(v)
+                if (op === '<=') finalValue = toUTCEndOfDay(v)
+              }
+              return `${encodeURIComponent(fieldName)}${op}${encodeURIComponent(finalValue)}`
+            }).join('&')
+          }
+
+          // Valor único (select, radio, input, date)
+          let finalValue = value
+          if (type === 'date') {
+            if (op === '>=') finalValue = toUTCStartOfDay(value)
+            if (op === '<=') finalValue = toUTCEndOfDay(value)
+          }
+
+          return `${encodeURIComponent(fieldName)}${op}${encodeURIComponent(finalValue)}`
+
+        })
+        .filter(q => q) // Remove strings vazias
+        .join('&')
+      
+    }, [debounced])
+
+    return {
+      filtros,
+      setFiltro,
+      mergeFiltros,
+      clearFiltros,
+      queryString,
+      handleChange,
+      filtersApllyed
+    }
+  }
+</script>

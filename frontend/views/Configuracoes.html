@@ -1,70 +1,199 @@
+<!-- frontend/views/Configuracoes.html -->
 <script type="text/babel">
-  
+
   const Configuracoes = () => {
-    
-    //const { data, isLoading, error } = useEncargos();
+
+    const [abaAtiva, setAbaAtiva] = React.useState('regua')
+    const [activeModal, setActiveModal] = React.useState(null)
+
+    const {
+      filtros,
+      mergeFiltros,
+      clearFiltros,
+      queryString,
+      handleChange,
+      filtersApllyed
+    } = useFiltros(600)
+
+    const { data, isLoading } = useConfigList(abaAtiva, queryString)
+    const presentation = data?.response?.presentation || {}
+
+    const { mutate: deleteRegua,   isLoading: deletingRegua   } = useDeleteRegua(handleClose)
+    const { mutate: deleteEncargo, isLoading: deletingEncargo } = useDeleteEncargo(handleClose)
+
+    const tabs = [
+      { key: 'regua',    label: 'Régua'    },
+      { key: 'encargos', label: 'Encargos' },
+    ]
+
+    function handleClose() {
+      setActiveModal(null)
+    }
+
+    const handleClickTab = (tab) => {
+      setAbaAtiva(tab)
+      setActiveModal(null)
+    }
+
+    const handleAction = ({ modal, record }) => {
+      setActiveModal({ modal, record })
+    }
+
+    const handleClearFilters = () => {
+      setActiveModal(null)
+      if (Object.keys(filtersApllyed).length) clearFiltros()
+    }
+
+    const handleConfirmDelete = () => {
+      const id = activeModal?.record?.id
+      if (!id) return
+
+      if (abaAtiva === 'regua') {
+        deleteRegua(id)
+      } else {
+        deleteEncargo(id)
+      }
+    }
+
+    const isDeleteModal = activeModal?.modal === 'delete-regua' ||
+                          activeModal?.modal === 'delete-encargos'
+    const isDeleting    = deletingRegua || deletingEncargo
 
     return (
       <>
+        {/* Cabeçalho */}
         <div className="conteiner-titulo-pag">
           <div id="conteiner-title-pag">
             <h1>Configurações</h1>
             <p>Ajuste preferências, integrações e parâmetros do sistema</p>
           </div>
-          
+
           <div id="container-btns-title">
-            <button className="btn-primario btn-title">
+            <button
+              className="btn-primario btn-title"
+              onClick={() => setActiveModal({ modal: `edit-${abaAtiva}`, record: null })}
+            >
               <i data-lucide="plus"></i>
-              <span>Adicionar Novo Registro</span>
+              <span>Adicionar Registro</span>
             </button>
           </div>
         </div>
 
+        {/* Tabs */}
         <div className="conteiner-btn-seguimentacao">
-          <button className="btn-seguimentoRegua ativo">
-            <span>Régua</span>
-          </button>
-
-          <button className="btn-seguimentoRegua">
-            <span>Encargos</span>
-          </button>
+          {tabs.map(tab => (
+            <button
+              key={tab.key}
+              className={`btn-seguimentoRegua ${abaAtiva === tab.key ? 'ativo' : ''}`}
+              onClick={() => handleClickTab(tab.key)}
+            >
+              <span>{tab.label}</span>
+            </button>
+          ))}
         </div>
 
+        {/* Filtros */}
         <div className="container-filtros">
           <div className="busca-avancada">
             <i data-lucide="search"></i>
             <input
               className="input-buscaAvancada"
-              placeholder="Buscar..."
+              placeholder={`Buscar ${abaAtiva === 'regua' ? 'régua' : 'encargo'}...`}
+              onChange={(e) => handleChange(e.target.value)}
             />
           </div>
 
           <div className="container-select-filtros">
-            <button className="btn-secundario">
+            <button
+              type="button"
+              className="btn-secundario"
+              onClick={() => setActiveModal({ modal: 'filtrar' })}
+            >
               Filtros
               <i data-lucide="funnel"></i>
-              <div className="count-filtros" id="count-filtros">0</div>
+              <div className="count-filtros">{Object.keys(filtersApllyed).length}</div>
             </button>
-
-            <div className="container-filtrado" id="tagsFiltradas"></div>
           </div>
         </div>
-        
+
+        {/* Tabela */}
         <Table
-          tableConfig={data?.response?.tableConfig}
+          presentation={presentation}
           data={data?.response?.data || []}
           isLoading={isLoading}
-          actionHandlers={{
-            edit: (item) => console.log("Editando:", item)
-          }}
+          actionHandlers={handleAction}
+          activeModal={activeModal}
         />
+
+        {/* Modal: formulário Régua */}
+        {activeModal?.modal === 'edit-regua' && (
+          <FormRegua
+            onClose={handleClose}
+            record={activeModal?.record}
+            presentation={presentation}
+          />
+        )}
+
+        {/* Modal: formulário Encargos */}
+        {activeModal?.modal === 'edit-encargos' && (
+          <FormEncargos
+            onClose={handleClose}
+            record={activeModal?.record}
+            presentation={presentation}
+          />
+        )}
+
+        {/* Modal: filtros avançados */}
+        {activeModal?.modal === 'filtrar' && (
+          <FormFiltro
+            onClose={handleClose}
+            currentValues={filtros}
+            presentation={presentation}
+            onApply={mergeFiltros}
+            onClear={handleClearFilters}
+          />
+        )}
+
+        {/* Modal: confirmação de exclusão */}
+        {isDeleteModal && (
+          <div className="modal-confirm" style={{ display: 'flex' }}>
+            <div className="modal-content">
+              <p>
+                {activeModal?.modal === 'delete-regua'
+                  ? 'Deseja excluir esta régua?'
+                  : 'Deseja excluir este encargo?'
+                }
+              </p>
+              <div className="modal-buttons">
+                <button
+                  type="button"
+                  className="btn-primario"
+                  disabled={isDeleting}
+                  style={{ background: '#e53935' }}
+                  onClick={handleConfirmDelete}
+                >
+                  {isDeleting ? 'Excluindo...' : 'Confirmar'}
+                </button>
+                <button
+                  type="button"
+                  className="btn-secundario"
+                  onClick={handleClose}
+                >
+                  Cancelar
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
       </>
-    );
+    )
   }
+
 </script>
 
 <style>
-  .btn-title{
+  .btn-title {
     display: flex;
     align-items: center;
     gap: 8px;
@@ -136,7 +265,7 @@
 
   .busca-avancada input {
     padding: 8px 12px 8px 36px;
-  } 
+  }
 
   .busca-avancada svg {
     position: absolute;
@@ -179,22 +308,4 @@
     padding: 2px 5px;
     border-radius: 10px;
   }
-  
-  .container-filtrado {
-    display: flex;
-    gap: 10px;
-  }
-
-  .filtrado {
-    background-color: var(--cor-navebar);
-    padding: 5px 18px;
-    border-radius: 50px;
-    color: white;
-    text-transform: lowercase;
-    text-transform: capitalize;
-    display: flex;
-    align-items: center;
-    cursor: pointer;
-  }
-
 </style>

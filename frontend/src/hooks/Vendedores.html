@@ -1,0 +1,46 @@
+<script>
+  function useVendedores(id = null) {
+    return useQuery({
+      queryKey: ['record-vendedores', id],
+      queryFn: () => {
+        let endpoint = 'vendedores'
+
+        if (id) {
+          endpoint = `${endpoint}/${id}`
+        }
+        
+        return googleFetch().get(endpoint)
+        
+      },
+      refetchOnWindowFocus: false,
+      staleTime: 1000 * 60 * 5,
+      retry: false,
+    });
+  }
+
+  function useVendedoresList(filters = null) {
+    return useQuery({
+      queryKey: ['vendedores-list', filters],
+      queryFn: () => googleFetch().get('vendedores', filters),
+      refetchOnWindowFocus: false,
+      staleTime: 1000 * 60 * 5,
+      retry: false,
+      enabled: true
+    });
+  }
+
+  function useSaveVendedor(onClose) {
+    return useMutation({
+      mutationFn: (body) => {
+        return body.id
+          ? googleFetch().put(`vendedores/${body.id}`, body)
+          : googleFetch().post('vendedores', body)
+      },
+      onSuccess: async () => {
+        await window.queryClient.invalidateQueries({ queryKey: ['vendedores-list'] });
+        await window.queryClient.invalidateQueries({ queryKey: ['record-vendedores'] });
+        onClose();
+      }
+    })
+  }
+</script>

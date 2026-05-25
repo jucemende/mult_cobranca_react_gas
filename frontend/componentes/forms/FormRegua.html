@@ -1,0 +1,164 @@
+<!-- frontend/componentes/forms/FormRegua.html -->
+<script type="text/babel">
+
+  const FormRegua = ({ onClose, record, presentation }) => {
+
+    const isEdit = !!(record?.id)
+    const { mutate: saveRegua, isLoading: saving } = useSaveRegua(onClose)
+
+    const faseOptions  = presentation?.formFields?.faseRegua  || []
+    const canalOptions = presentation?.formFields?.acoesRegua || []
+
+    const [formData, setFormData] = React.useState({
+      id:              '',
+      faseRegua:       '',
+      titulo:          '',
+      atrasoDe:        '',
+      atrasoAte:       '',
+      acoesRegua:      '',
+      permiteBloqueio: false,
+      mensagemPadrao:  '',
+    })
+
+    // Preenche o form ao editar
+    React.useEffect(() => {
+      if (isEdit && record) {
+        setFormData({
+          id:              record.id              || '',
+          faseRegua:       record.faseRegua       || '',
+          titulo:          record.titulo          || '',
+          atrasoDe:        record.atrasoDe        ?? '',
+          atrasoAte:       record.atrasoAte       ?? '',
+          acoesRegua:      record.acoesRegua      || '',
+          permiteBloqueio: record.permiteBloqueio ?? false,
+          mensagemPadrao:  record.mensagemPadrao  || '',
+        })
+      }
+    }, [record])
+
+    const handleChange = (e) => {
+      const { name, value, type, checked } = e.target
+      setFormData(prev => ({
+        ...prev,
+        [name]: type === 'checkbox' ? checked : value
+      }))
+    }
+
+    const handleSubmit = () => {
+      saveRegua(formData)
+    }
+
+    return (
+      <div className="drawer-cliente">
+        <form className="form-cliente">
+
+          <h3>{isEdit ? 'Editar Régua' : 'Nova Régua'}</h3>
+
+          <div className="conteiner-cliente">
+
+            {/* Fase */}
+            <Select
+              options={faseOptions}
+              name="faseRegua"
+              label="Fase da Régua"
+              value={formData.faseRegua}
+              onChange={handleChange}
+            />
+
+            {/* Título */}
+            <div>
+              <label>Título</label>
+              <input
+                type="text"
+                name="titulo"
+                value={formData.titulo}
+                onChange={handleChange}
+                placeholder="Título opcional"
+              />
+            </div>
+
+            {/* Intervalo de atraso */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+              <div>
+                <label>Atraso De (dias)</label>
+                <input
+                  type="number"
+                  name="atrasoDe"
+                  value={formData.atrasoDe}
+                  onChange={handleChange}
+                  placeholder="Ex: -15"
+                />
+              </div>
+              <div>
+                <label>Atraso Até (dias)</label>
+                <input
+                  type="number"
+                  name="atrasoAte"
+                  value={formData.atrasoAte}
+                  onChange={handleChange}
+                  placeholder="Ex: 30"
+                />
+              </div>
+            </div>
+
+            {/* Canal */}
+            <Select
+              options={canalOptions}
+              name="acoesRegua"
+              label="Canal de Ação"
+              value={formData.acoesRegua}
+              onChange={handleChange}
+            />
+
+            {/* Permite bloqueio */}
+            <div>
+              <label>Restrições</label>
+              <div className="radio-group">
+                <input
+                  type="checkbox"
+                  id="reg_bloqueio"
+                  name="permiteBloqueio"
+                  checked={!!formData.permiteBloqueio}
+                  onChange={handleChange}
+                />
+                <label htmlFor="reg_bloqueio" className="radio-label">
+                  Permite Bloqueio
+                </label>
+              </div>
+            </div>
+
+            {/* Mensagem padrão */}
+            <div>
+              <label>Mensagem Padrão</label>
+              <textarea
+                name="mensagemPadrao"
+                rows="6"
+                value={formData.mensagemPadrao}
+                onChange={handleChange}
+                placeholder="Texto da mensagem enviada ao cliente..."
+              />
+            </div>
+
+          </div>
+
+          <div style={{ marginTop: 'auto', display: 'flex', gap: '8px' }}>
+            <button
+              type="button"
+              className="btn-primario"
+              disabled={saving}
+              onClick={handleSubmit}
+            >
+              {saving ? 'Salvando...' : 'Salvar'}
+            </button>
+
+            <button type="button" className="btn-secundario" onClick={onClose}>
+              Cancelar
+            </button>
+          </div>
+
+        </form>
+      </div>
+    )
+  }
+
+</script>

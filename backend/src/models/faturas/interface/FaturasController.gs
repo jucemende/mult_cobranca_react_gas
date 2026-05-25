@@ -21,8 +21,10 @@ class FaturasController {
       }
     }
     
+    const result = service.getAll(params)
     return {
-      data: service.getAll(params),
+      data: result.data,
+      totais: result.totais,
       presentation: faturasPresentations().tableFaturas
     }
     
@@ -36,8 +38,10 @@ class FaturasController {
       return service.getById(id)
     }
 
+    const result = service.getAll(params)
     return {
-      data: service.getAll(params),
+      data: result.data,
+      totais: result.totais,
       presentation: faturasPresentations().tableAgruapadas
     }
 
@@ -47,6 +51,11 @@ class FaturasController {
     const service = this._usesCases().invoicesUseCase
     const dto = new FaturasCreateDTO(data);
     return service.create(dto);
+  }
+
+  static importInvoice({ data }) {
+    const service = this._usesCases().invoicesUseCase
+    return service.importCsv(data);
   }
 
   static putInvoice({ id, data }) {

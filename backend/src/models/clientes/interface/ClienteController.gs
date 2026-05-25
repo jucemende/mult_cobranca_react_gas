@@ -13,9 +13,6 @@ class ClienteController {
   }
 
   static get({ id = null, params = {} }) {
-    
-    const data = () => {
-      
     const enunsStatus = getEnunsClientes().statusCliente
     const status = Object.entries(enunsStatus).map(([k, v]) => ({key: k, value: v}))
 
@@ -29,13 +26,11 @@ class ClienteController {
         vendedores
       }
     }
-    
-    return this.service().getAll(params);
 
-    }
-
-    return data()
-
+    return {
+      data: this.service().getAll(params),
+      presentation: clientesPresentation()
+    };
   }
 
   static post({ data }) {

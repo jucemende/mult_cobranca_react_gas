@@ -4,7 +4,7 @@ function TestCobrancasUseCase() {
     {cobrancasRepository: new SheetsCobrancasRepository()}
   )
 
-  const chargesView = serviceCharges.getAll()
+  const chargesView = serviceCharges.getById('47953')
 
   console.log(chargesView)
 
@@ -27,6 +27,7 @@ class CobrancasUseCase {
     const cobrancas = this.boots.cobrancas()
     const clientes = this.boots.clientes()
     const reguas = this.boots.regua()
+    const faturas = this.boots.faturas()
     
     let rows = Object.keys(cobrancas).map(c =>{
       const listCobranca = cobrancas[c]
@@ -41,7 +42,7 @@ class CobrancasUseCase {
 
       return new CobrancasListDTO(ultima, qtdCobrancas, cliente, fase)
 
-    })
+    }).filter(row => Boolean(faturas[row.documento])) // filtra apenas as cobranças com faturas abertas.
 
     if (search) {
       rows = this.repository.applyAdvancedSearch(rows, search[0].value);
@@ -55,13 +56,32 @@ class CobrancasUseCase {
     
   }
 
-  getView(faturas) {
+  getById( id ) {
+    if (!id) throw new Error('ID é obrigatório');
+    
+    const cobrancas = this.repository.getById(id)
+    if (!cobrancas) throw new Error('Registro não encontrado')
 
-    if (!faturas.length)
-      throw new Error('Nenhuma fatura elegível para cobranças')
+    const clientes = this.boots.clientes()
+    const reguas = this.boots.regua()
+
+    let rows = cobrancas.map(c =>{
+      const fase = reguas[c.reguaId]?._faseRegua
+      const cliente = clientes[c.codCliente]?.cliente
+      
+      return new CobrancasListDTO(c, 0, cliente, fase)
+    })
+
+    return rows
+  }
+
+  getView(faturas) {
 
     const regua = this._getReguaPrincipal(faturas)
 
+    if (!faturas.length || !regua)
+      throw new Error('Nenhuma fatura elegível para cobranças')
+    
     return new CobrancaViewDTO(faturas, regua)
   }
 
@@ -97,16 +117,17 @@ class CobrancasUseCase {
   _getReguaPrincipal(faturas) {
 
     const reguas = this.serviceRegua.getAll()
-
     const reguasAplicadas = faturas
-      .map(f =>
-        reguas.find(r =>
+      .map(f => {
+        console.log(f.diasAtraso)
+        return reguas.find(r =>
           f.diasAtraso >= r.atrasoDe &&
           f.diasAtraso <= r.atrasoAte
         )
-      )
+      })
       .filter(Boolean)
 
+    console.log(reguasAplicadas)
     if (!reguasAplicadas.length)
       return null
 

@@ -1,0 +1,88 @@
+<script type="text/babel">
+
+  const FormVendedor = ({onClose, record}) => {
+
+    const id = record?._id || record?.id || null
+    const { data, isLoading, error } = useVendedores(id);
+    const saveVendedor = useSaveVendedor(onClose);
+
+    const [formData, setFormData] = React.useState({
+      vendedor: '',
+      email: ''
+    })
+
+    const handleInputChange = (e) => {
+      const { name, value } = e.target;
+      setFormData((prev) => ({
+        ...prev,
+        [name]: value,
+      }));
+    };
+
+    const handleSubmit = (e) => {
+      e.preventDefault();
+      saveVendedor.mutate({
+        id,
+        vendedor: formData.vendedor,
+        email: formData.email,
+      });
+    };
+
+    React.useEffect(() => {
+      if (id && data?.response) {
+        const vendedor = data?.response?.data;
+        setFormData({
+          vendedor: vendedor.vendedor || '',
+          email: vendedor.email || ''
+        });
+      }
+    }, [data, id])
+
+    return (
+      <div className="drawer-cliente">
+
+        <form className="form-cliente" onSubmit={handleSubmit}>
+
+          <h3>Cadastro de Vendedores</h3>
+
+          { isLoading ? (
+            <Loading />
+          ) : (
+            <div className="conteiner-cliente">
+              <div>
+                <label>Nome do Vendedor</label>
+                <input
+                  type="text"
+                  name="vendedor"
+                  value={formData.vendedor}
+                  onChange={handleInputChange}
+                />
+              </div>
+
+              <div>
+                <label>E-mail</label>
+                <input
+                  type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleInputChange}
+                />
+              </div>
+            </div>
+          )}
+
+          <div style={{ marginTop: 'auto', display: 'flex', gap: '8px' }}>
+            <button type="submit" className="btn-primario" disabled={saveVendedor.isLoading}>
+              {saveVendedor.isLoading ? 'Salvando...' : 'Salvar'}
+            </button>
+
+            <button type="button" className="btn-secundario" onClick={onClose}>
+              Cancelar
+            </button>
+          </div>
+
+        </form>
+      </div>
+    )
+  };
+</script>

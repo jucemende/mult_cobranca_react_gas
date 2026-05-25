@@ -1,0 +1,291 @@
+<script type="text/babel">
+
+  const FormCobrancas = ({onClose, record}) => {
+
+    const { codCliente } = record
+    const { data: cobrancaView, isLoading: loadingView, error: errorView } = useCobrancasView(codCliente)
+    
+    const { mutate: enviarWhats, isLoading: enviandoMsg } = useSendWhatsApp()
+    const { mutate: enviarEmail, isLoading: enviandoEmail } = useSendEmail()
+    const { mutate: saveCobranca, isLoading: savingCobranca } = useSaveCobranca(onClose)
+
+    const [isDisabled, setIsDisabled ] = React.useState(true)
+
+    const presentation = cobrancaView?.response?.presentation || {}
+
+    const [formData, setFormData] = React.useState({
+      codCliente: '',
+      cliente: '',
+      email: '',
+      telefone: '',
+      canal: '',
+      acao: '',
+      status: '',
+    })
+
+    const handleInputChange = (e) => {
+      const { name, value } = e.target;
+      setFormData((prev) => ({
+        ...prev,
+        [name]: value,
+      }));
+    };
+
+    React.useEffect(() => {
+      if (cobrancaView?.response) {
+        const { cliente, regua } = cobrancaView?.response?.data
+        
+        setFormData({
+          codCliente: cliente.codCliente || '',
+          cliente: cliente.cliente || '',
+          email: cliente.email || '',
+          telefone: cliente.telefone || '',
+          fase: regua.faseRegua || '',
+        })
+
+        setIsDisabled(false)
+        
+      }
+    }, [cobrancaView])
+
+    const formRef = React.useRef(null);
+
+    React.useEffect(() => {
+      if (window.lucide && formRef.current) {
+        const icons = formRef.current.querySelectorAll('i[data-lucide]');
+        if (icons.length) window.lucide.createIcons({ nodes: [...icons] });
+      }
+    }, [formData.canal, enviandoMsg, enviandoEmail]);
+    
+    return (
+      <div className="drawer-cobranca" id="drawer-cobranca" ref={formRef}>
+        <form className="form-cobranca">
+
+          <h3>Gerar Cobrança</h3>
+
+          <div className="conteiner-cobranca">
+
+            <div>
+              <label>Cód. Cliente</label>
+              <input
+                className="codCliente"
+                type="number"
+                name="codCliente"
+                readonly=""
+                value={formData.codCliente}
+                onChange={handleInputChange}
+              />
+            </div>
+
+            <div>
+              <label>Nome do Cliente</label>
+              <input
+                type="text"
+                name="cliente"
+                readonly=""
+                value={formData.cliente}
+                onChange={handleInputChange}
+              />
+            </div>
+            <div>
+              <label>Perfil</label>
+              <input
+                type="text"
+                name="fase"
+                readonly=""
+                value={formData.fase}
+                onChange={handleInputChange}
+              />
+            </div>
+
+          </div>
+
+          <div className="conteiner-comunicacao">
+            <Select
+              options={presentation?.canais}
+              name={'canal'}
+              label={'Canal'}
+              value={formData.canal}
+              onChange={handleInputChange}
+            />
+
+            <Select
+              options={presentation?.acoes}
+              name={'acao'}
+              label={'Ação'}
+              value={formData.acaos}
+              onChange={handleInputChange}
+            />
+
+            <Select
+              options={presentation?.status}
+              name={'status'}
+              label={'Status'}
+              value={formData.status}
+              onChange={handleInputChange}
+            />
+          </div>
+
+          {formData.canal === 'WHATSAPP' &&
+            <div id="container-whatsapp" className="hidden">
+              <label>WhatsApp</label>
+              <div className="conteiner-contatos">
+                <input
+                  type="text"
+                  name="telefone"
+                  value={formData.telefone}
+                  onChange={handleInputChange}
+                  placeholder="Digite o número"
+                />
+                <button 
+                  title="Abrir WhatsApp" 
+                  type="button"
+                  className="icon-send" 
+                  onClick={() => enviarWhats(formData)}
+                  disabled={enviandoMsg}
+                >
+                  {enviandoMsg ? (
+                    <span key="wrapper-loading"><Loading /></span>
+                  ) : (
+                    <span key="wrapper-icon"><i data-lucide="message-circle"></i></span>
+                  )}
+                </button>
+              </div>
+            </div>
+          }
+
+          {formData.canal === 'EMAIL' &&
+            <div id="container-email" className="hidden">
+              <label>E-mails</label>
+              <div className="conteiner-contatos">
+                <input
+                  type="text"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleInputChange}
+                  placeholder="Digite o e-mail"
+                />
+                <button
+                  title="Enviar E-mail"
+                  type="button"
+                  className="icon-send"
+                  onClick={() => enviarEmail(formData)}
+                  disabled={enviandoEmail}
+                >
+                  {enviandoEmail ? (
+                    <span key="wrapper-loading"><Loading /></span>
+                  ) : (
+                    <span key="wrapper-icon"><i data-lucide="send"></i></span>
+                  )}
+                </button>
+              </div>
+            </div>
+          }
+
+          <div style={{ display: 'flex', flexDirection: 'column', overflowY: 'hidden', height: '100%' }}>
+            <h3>Faturas vinculadas</h3>
+            <Table
+              presentation={presentation}
+              data={cobrancaView?.response?.data?.faturas}
+              isLoading={loadingView}
+            />
+          </div>
+
+          <div style={{ marginTop: 'auto', display: 'flex', gap: '8px' }}>
+            <button
+              type="button"
+              className="btn-primario"
+              data-action="save"
+              disabled={isDisabled || savingCobranca}
+              onClick={() => {
+                saveCobranca(formData)
+                setIsDisabled(false)
+              }}
+            >
+              {savingCobranca ? 'Salvando...' : 'Salvar'}
+            </button>
+
+            <button type="button" className="btn-secundario" onClick={onClose}>
+                Cancelar
+            </button>
+          </div>
+        </form>
+      </div>
+    )
+  }
+</script>
+
+<style>
+  .drawer-cobranca {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 800px;
+    height: 100%;
+    background-color: #ffffff;
+    border-left: 1px solid #ddd;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    z-index: 11;
+    box-shadow: 2px 0 6px rgba(0, 0, 0, 0.2);
+    overflow: auto;
+  }
+
+  .form-cobranca {
+    display: flex;
+    flex-direction: column;
+    padding: 16px;
+    gap: 16px;
+    height: 100vh;
+  }
+
+  .form-cobranca h3 {
+    margin: 0 0 8px 0;
+    font-weight: 500;
+    color: #333;
+  }
+
+  .conteiner-cobranca {
+    display: grid;
+    grid-template-columns: 0.5fr 1.5fr 1fr;
+    gap: 12px;
+  }
+
+  .conteiner-cobranca div input {
+    width: 100%;
+  }
+
+  .codCliente {
+    width: 90px;
+  }
+
+  .conteiner-comunicacao {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px;
+  }
+
+  .conteiner-contatos {
+    display: flex;
+    gap: 12px;
+  }
+
+  .icon-send {
+    width: 35px;
+    height: 35px;
+    
+    color: black;
+    background: none;
+    border: none;
+    cursor: pointer;
+  
+  }
+
+  .icon-send > span {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+</style>

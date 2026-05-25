@@ -1,3 +1,5 @@
+// backend/src/models/regua/interface/ReguaController.gs
+
 class ReguaController {
 
   static service() {
@@ -7,20 +9,17 @@ class ReguaController {
   }
 
   static get({ id = null, params = {} }) {
-    
-    const data = () => {
 
-      if(id) {
-        return this.service().getById(id)
+    if (id) {
+      return {
+        data: this.service().getById(id)
       }
-    
-      return this.service().getAll(params);
-
     }
 
     return {
-      data: data(),
-    }
+      data: this.service().getAll(params),
+      presentation: reguaPresentation()
+    };
 
   }
 

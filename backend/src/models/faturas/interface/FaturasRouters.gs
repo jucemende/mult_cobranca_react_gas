@@ -22,6 +22,8 @@ function FaturasRouters(request) {
       return controller.getInvoice({ id, params })
     case 'POST/faturas':
       return controller.postInvoice({ data: body });
+    case 'POST/faturas-import':
+      return controller.importInvoice({ data: body });
     case 'PUT/faturas':
       if (!id) throw new Error('PUT requer ID');
       return controller.putInvoice({ id, data: body });

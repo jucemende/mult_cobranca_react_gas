@@ -1,80 +1,85 @@
-function getConfigEncargo() {
-  
+function encargosPresentation() {
+
   const { tipoCobranca, aplicacao, recorrencia } = getEnunsEncargos()
-  
-  const enuns = {
-    tipos: [
-      {value: tipoCobranca.JUROS, color: 'color-red'},
-      {value: tipoCobranca.MULTA, color: 'color-yellow'}
+
+  const styles = {
+    tipoCobranca: [
+      { value: tipoCobranca.JUROS, className: 'color-red' },
+      { value: tipoCobranca.MULTA, className: 'color-yellow' },
     ],
     aplicacao: [
-      {value: aplicacao.ATRASO, className: 'color-red'},
-      {value: aplicacao.PARCELAMENTO, className: 'color-green'}
+      { value: aplicacao.ATRASO, className: 'color-red' },
+      { value: aplicacao.PARCELAMENTO, className: 'color-green' },
     ],
-    recorrencia: [
-      {value: recorrencia.DIARIA, color: 'color-red', recorrencia: 1},
-      {value: recorrencia.UNICA, color: 'color-green', recorrencia: null},
-      {value: recorrencia.MENSAL, color: 'color-yellow', recorrencia: 30}
-    ]
-  }
-  
-  const tableConfig = {
-    tableId: 'config-encargos',
-
-    domain: 'encargos',
-
-    headers: [
-      { key: '_taxaJuros', label: 'Taxa de Juros'},
-      { key: '_tipoCobranca', label: 'Tipo de Cobrança' },
-      { key: '_recorrencia', label: 'Recorrência' },
-      { key: '_aplicacao', label: 'Aplicação', style: enuns.aplicacao }
-    ],
-
-    actions: [
-      { type: 'edit', title: "Editar", icon: 'square-pen' },
-      { type: 'delete', title: "Deletar", icon: 'trash-2' }
-    ],
-
-    records: 10,
-    totais: false
-
   }
 
-  const filterConfig = [
+  const enuns = {
+    tipoCobranca: Object.entries(tipoCobranca).map(([k, v]) => ({ key: k, value: v })),
+    aplicacao: Object.entries(aplicacao).map(([k, v]) => ({ key: k, value: v })),
+    recorrencia: Object.entries(recorrencia).map(([k, v]) => ({ key: k, value: v })),
+  }
+
+  const tableHeaders = [
+    { key: '_tipoCobranca', label: 'Tipo', style: styles.tipoCobranca },
+    { key: '_aplicacao', label: 'Aplicação', style: styles.aplicacao },
+    { key: '_recorrencia', label: 'Recorrência' },
+    { key: '_taxaJuros', label: 'Taxa de Juros' },
+  ]
+
+  const actions = [
+    { type: 'edit-encargos', title: 'Editar', icon: 'square-pen' },
+    { type: 'delete-encargos', title: 'Deletar', icon: 'trash-2' },
+  ]
+
+  const filtersLayout = [
     {
-      element: 'input',
-      type: 'number',
-      name: 'taxaJuros',
-      label: 'Taxa Juros'
-    },
-    {
-      element: 'input',
-      type: 'date',
-      name: 'criadoEm',
-      label: 'Criado em'
-    },
-    {
-      element: 'select',
-      name: 'tipoCobranca',
-      label: 'Tipo Cobrança',
-      options: enuns.tipos
-    },
-    {
-      element: 'select',
-      name: 'aplicacao',
-      label: 'Aplicação',
-      options: enuns.aplicacao
-    },
-    {
-      element: 'select',
-      name: 'recorrencia',
-      label: 'Recorrência',
-      options: enuns.recorrencia
+      type: 'row',
+      columns: 1,
+      children: [
+        { type: 'field', name: 'tipoCobranca' },
+        { type: 'field', name: 'aplicacao' },
+        { type: 'field', name: 'recorrencia' },
+        { type: 'field', name: 'taxaJuros' },
+      ]
     }
   ]
 
-  return {
-    tableConfig,
-    filterConfig
+  const fields = {
+    tipoCobranca: {
+      element: 'select',
+      name: 'tipoCobranca',
+      label: 'Tipo de Cobrança',
+      options: enuns.tipoCobranca,
+      op: '='
+    },
+    aplicacao: {
+      element: 'select',
+      name: 'aplicacao',
+      label: 'Aplicação',
+      options: enuns.aplicacao,
+      op: '='
+    },
+    recorrencia: {
+      element: 'select',
+      name: 'recorrencia',
+      label: 'Recorrência',
+      options: enuns.recorrencia,
+      op: '='
+    },
+    taxaJuros: {
+      element: 'input',
+      name: 'taxaJuros',
+      label: 'Taxa Juros',
+      op: '='
+    },
   }
+
+  // Opções reutilizadas nos formulários de criação/edição
+  const formFields = {
+    tipoCobranca: enuns.tipoCobranca,
+    aplicacao: enuns.aplicacao,
+    recorrencia: enuns.recorrencia,
+  }
+
+  return { tableHeaders, actions, filtersLayout, fields, formFields }
 }

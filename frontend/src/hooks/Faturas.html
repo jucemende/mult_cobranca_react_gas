@@ -1,0 +1,59 @@
+<script>
+  function useFaturas(id = null, filters = null) {
+    return useQuery({
+      queryKey: ['faturas', id, filters],
+      queryFn: () => {
+        let endpoint = 'faturas-list'
+
+        if (id) {
+          endpoint = `${endpoint}/${id}`
+        }
+        
+        return googleFetch().get(endpoint, filters)
+        
+      },
+      refetchOnWindowFocus: false,
+      staleTime: 1000 * 60 * 5,
+      retry: false,
+
+    });
+  }
+
+  function useSaveFatura(onClose) {
+    return useMutation({
+      mutationFn: (body) => {
+        return body.id
+          ? googleFetch().put(`faturas/${body.id}`, body)
+          : googleFetch().post('faturas', body)
+      },
+      onSuccess: async () => {
+        await window.queryClient.invalidateQueries({ queryKey: ['faturas'] });
+        await window.queryClient.invalidateQueries({ queryKey: ['cobranca'] });
+        onClose();
+        showToast("Fatura salva com sucesso!", "success")
+      },
+      onError: (error) => {
+        const errorMsg = error?.response?.data?.message || error.message || 'Erro ao salvar fatura';
+        showToast(errorMsg, "error")
+      }
+    })
+  }
+
+  function useDeleteFatura(onSuccess) {
+    return useMutation({
+      mutationFn: (id) => {
+        return googleFetch().delete(`faturas/${id}`)
+      },
+      onSuccess: async () => {
+        await window.queryClient.invalidateQueries({ queryKey: ['faturas'] });
+        await window.queryClient.invalidateQueries({ queryKey: ['cobranca'] });
+        if (onSuccess) onSuccess();
+        showToast("Fatura deletada com sucesso!", "success")
+      },
+      onError: (error) => {
+        const errorMsg = error?.response?.data?.message || error.message || 'Erro ao deletar fatura';
+        showToast(errorMsg, "error")
+      }
+    })
+  }
+</script>

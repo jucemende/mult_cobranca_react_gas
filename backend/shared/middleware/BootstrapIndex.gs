@@ -1,9 +1,9 @@
 function testBootstrap(){
 
-  let vendedores = BootstrapIndex().clientes()
+  let faturas = BootstrapIndex().cobrancas()
 
   //vendedores = Object.values(vendedores).map(i => ({key: i._id, value: i.vendedor}))
-  console.log(vendedores)
+  console.log(faturas)
 
 }
 
@@ -14,6 +14,14 @@ function BootstrapIndex() {
 
     return Object.fromEntries(
       listClientes.map(v => [v.cod, v])
+    )  
+  }
+
+  const faturas = () => {
+    let linhasFaturas = new SheetsFaturasRepository().getAll()
+
+    return Object.fromEntries(
+      linhasFaturas.map(f => [f.documento, f])
     )  
   }
 
@@ -56,7 +64,8 @@ function BootstrapIndex() {
     vendedores,
     encargos,
     regua,
-    cobrancas
+    cobrancas,
+    faturas
   }
 
 }

@@ -1,7 +1,7 @@
 function testControllerCobrancas() {
   const controller = CobrancasController
   
-  console.log(controller.getView({id: '6300'}))
+  console.log(controller.getAll({}))
 
 }
 
@@ -43,8 +43,18 @@ class CobrancasController {
   }
 
   static getAll({ id = null, params = {} }){
+    
+    const service = this._usesCases().cobrancasUseCase
+
+    if ( id ) {
+      return {
+        data: service.getById(id),
+        presentation: cobrancasPresentation().tableHistorico
+      }
+    }
+
     return {
-      data: this._usesCases().cobrancasUseCase.getAll(params),
+      data: service.getAll(params),
       presentation: cobrancasPresentation().tableCobrancas
     }
   }
@@ -52,7 +62,7 @@ class CobrancasController {
   static getView({ id = null, params = {} }) {
     const faturas = this._getFaturas(id)
     return {
-      data: this._usesCases().cobrancasUseCase.getView(faturas),
+      data: this._usesCases().cobrancasUseCase.getView(faturas.data),
       presentation: cobrancasPresentation().viewCobranca
     }
   }
@@ -60,7 +70,7 @@ class CobrancasController {
   static post({ data }) {
     const dto = new CobrancasCreateDTO(data);
     const faturas = this._getFaturas(dto.codCliente)
-    dto.faturas = faturas
+    dto.faturas = faturas.data
     return this._usesCases().cobrancasUseCase.create(dto);
   }
 

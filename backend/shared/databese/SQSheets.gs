@@ -12,7 +12,7 @@ class SQSheets {
         .getProperty('ENV');
 
       const DEV_ID = '1CtxP0LOipQvtx8bdX40_F3I1yoLsojDmb3R3tK4YaP8';
-      const PROD_ID = '1QqJKN_eXNXNdbDwOu0e7F-aqdCTMlcUjZvbLvdfheew';
+      const PROD_ID = '1CtxP0LOipQvtx8bdX40_F3I1yoLsojDmb3R3tK4YaP8';
 
       SQSheets._ss = SpreadsheetApp.openById(
         env === 'PROD' ? PROD_ID : DEV_ID
@@ -63,7 +63,7 @@ class SQSheets {
       const cachePayload = JSON.stringify({ headers, rows: cleanRows });
       
       if (cachePayload.length < 100000) {
-          cache.put(this.tableName, cachePayload, 300);
+          cache.put(this.tableName, cachePayload, 0);
       }
 
       // Retorna o objeto formatado como antes

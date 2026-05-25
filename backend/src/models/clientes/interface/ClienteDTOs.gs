@@ -3,6 +3,7 @@ class ClienteCreatDTO extends BaseDTO {
   constructor({
     id = null,
     cod,
+    idVendedor,
     vendedorId,
     cliente,
     tipo,
@@ -20,6 +21,7 @@ class ClienteCreatDTO extends BaseDTO {
     this.id = id
     this.cod = cod
     this.vendedorId = this._isString(vendedorId, "Vendedor", false)
+    this.idVendedor = this._isString(idVendedor ?? vendedorId, "Vendedor", false)
     this.cliente = this._isString(cliente, 'Nome do Cliente')
     this.tipo = this._isString(tipo, 'Tipo')
     this.cnpjCpf = this._isString(cnpjCpf, 'CPF/CNPJ')

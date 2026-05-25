@@ -15,7 +15,7 @@ function TestCobrancaRepository() {
   
   const repo = new SheetsCobrancasRepository
 
-  const cobrancas = repo.insert(data)
+  const cobrancas = repo.getById('47953')
 
   console.log(cobrancas)  
 }
@@ -26,7 +26,7 @@ class SheetsCobrancasRepository extends CobrancasRepository {
     super();
     this.db = new SQSheets({
       tableName: 'bdCobrancas',
-      idField: 'id'
+      idField: 'documento'
     });
   }
 
@@ -37,6 +37,15 @@ class SheetsCobrancasRepository extends CobrancasRepository {
 
   }
 
+  getById(id) {
+    const rows = this.db.select(id)
+      .filter(r =>
+      String(r.documento) === String(id)
+    ) || null;
+
+    return rows.map(row => this._toEntity(row))
+  }
+
   applyAdvancedSearch(rows = [], value = '') {
     
     const searchableFields = [
@@ -45,6 +54,8 @@ class SheetsCobrancasRepository extends CobrancasRepository {
       'cliente',
       'diasAtraso',
       'dataContato',
+      'qtdCobrancas',
+      'fase',
       'regua',
       'canal',
       'acao',
@@ -52,7 +63,7 @@ class SheetsCobrancasRepository extends CobrancasRepository {
       
     ];
 
-    const normalized = value.toUpperCase();
+    const normalized = String(value).toUpperCase();
 
     return rows.filter(row =>
       searchableFields.some(field =>
@@ -71,6 +82,8 @@ class SheetsCobrancasRepository extends CobrancasRepository {
       documento: row => row.documento,
       cliente: row => row.cliente,
       dataContato: row => row.dataContato,
+      qtdCobrancas: row => row.qtdCobrancas,
+      fase: row => row.fase,
       regua: row => row.regua,
       canal: row => row.canal,
       acao: row => row.acao,

@@ -18,9 +18,16 @@ class VendedorController {
 
     }
 
+    if(id) {
+      return {
+        data: data()
+      }
+    }
+
     return {
       data: data(),
-    }
+      presentation: vendedoresPresentation()
+    };
 
   }
 

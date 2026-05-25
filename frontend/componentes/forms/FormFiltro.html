@@ -1,0 +1,414 @@
+<script type="text/babel">
+
+  const FormFiltro = ({presentation = {}, currentValues = {}, onClose,onApply, onClear}) => {
+
+    const { filtersLayout = [], fields = {} } = presentation
+    const { search, ...filtersApllyed } = currentValues
+    const [values, setValues] = React.useState(currentValues)
+    
+    const payload = {
+      ...values,
+      ...(search !== undefined && { search })
+    }
+
+    const handleChange = (fieldsConfig, value) => {
+      
+      const isEmpty = value === '' || value === null || value === undefined
+      
+      const { name, op, field, type, element } = fieldsConfig
+      
+      if (isEmpty && element !== 'checkbox') {
+        setValues(prev => {
+          const newValues = { ...prev }
+          delete newValues[name]
+          return newValues
+        })
+        return
+      }
+
+      // Para checkbox, se estiver vazio, deleta o filtro
+      if (element === 'checkbox' && (!value || value.length === 0)) {
+        setValues(prev => {
+          const newValues = { ...prev }
+          delete newValues[name]
+          return newValues
+        })
+        return
+      }
+
+      setValues(prev => ({...prev, [name]: {field: field || name, type, op: op || '=', value }}))
+    }
+
+    const FieldRenderer = React.useCallback(({ field, value, onChange }) => {
+      switch (field.element) {
+        case 'select':
+          return (
+            <Select
+              options={field.options}
+              name={field.name}
+              label={field.label}
+              value={value}
+              onChange={(e) =>
+                onChange(field, e.target.value)
+              }
+            />
+          )
+        
+        case 'input':
+          return (
+            <div>
+              <label>{field.label}</label>
+              <input
+                type={field.type || 'text'}
+                name={field.name}
+                value={value ?? ''}
+                onChange={(e) => {
+                  onChange(field, e.target.value)
+                }}
+              />
+            </div>
+          )
+        
+        case 'date':
+          return (
+            <div className="form-group">
+              <label>{field.label}</label>
+
+              <input
+                type="date"
+                name={field.name}
+                value={value ?? ''}
+                onChange={(e) => {
+                  const val = e.target.value
+          
+                  if (!val) {
+                    onChange(field, '')
+                    return
+                  }
+
+                  onChange(field, val)
+                }}
+              />
+            </div>
+          )
+        
+        case 'radio':
+          return (
+            <div>
+              <label>{field.label}</label>
+              <div className="radio-group">
+                
+                {field.options?.map((opt) => (
+                    <>
+                    <input
+                      id={opt.id}
+                      type="radio"
+                      className="info-form-Cliente"
+                      name={field.name}
+                      value={opt.value}
+                      checked={value === opt.value}
+                      onChange={(e) =>
+                        onChange(field, opt.value)
+                      }
+                    />
+                  <label htmlFor={opt.id} className="radio-label">{opt.label}</label>
+                  </>
+                ))}
+
+              </div>
+            </div>
+          )
+
+        case 'checkbox':
+          return (
+            <div>
+              <label>{field.label}</label>
+              <div className="radio-group">
+                
+                {field.options?.map((opt) => {
+                  const isChecked = Array.isArray(value) ? value.includes(opt.value) : value === opt.value
+                  
+                  return (
+                    <div key={opt.id} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <input
+                        id={opt.id}
+                        type="checkbox"
+                        className="info-form-Cliente"
+                        name={field.name}
+                        value={opt.value}
+                        checked={isChecked}
+                        onChange={(e) => {
+                          const newValues = Array.isArray(value) ? [...value] : []
+                          if (e.target.checked) {
+                            if (!newValues.includes(opt.value)) {
+                              newValues.push(opt.value)
+                            }
+                          } else {
+                            newValues.splice(newValues.indexOf(opt.value), 1)
+                          }
+                          onChange(field, newValues.length > 0 ? newValues : '')
+                        }}
+                      />
+                      <label htmlFor={opt.id} className="radio-label">{opt.label}</label>
+                    </div>
+                  )
+                })}
+
+              </div>
+            </div>
+          )
+
+        default:
+          return null
+      }
+    }, [])
+
+    const renderLayout = React.useCallback((node) => {
+
+      if (node.type === 'row') {
+        return (
+          <div
+            key={node.id || JSON.stringify(node)}
+            className="row"
+            style={{
+              display: 'grid',
+              gridTemplateColumns: `repeat(${node.columns || 1}, 1fr)`,
+              gap: '12px'
+            }}
+          >
+            {node.children?.map(renderLayout)}
+          </div>
+        )
+      }
+
+      if (node.type === 'field') {
+        const field = fields[node.name]
+        if (!field) return null
+
+        const filtro = values[node.name] || {}
+
+        return (
+          <div key={node.name}>
+            <FieldRenderer
+              field={{ ...field, name: node.name }}
+              value={filtro.value || ''}
+              onChange={handleChange}
+            />
+          </div>
+        )
+      }
+
+      return null
+
+    }, [fields, values, handleChange, FieldRenderer])
+
+    return (
+      <div className="tela-filtros">
+        <form className="form-filtros">
+          
+          <div className="conteiner-title-filters">
+            <h1>Filtrar por</h1>
+            <button type="button" onClick={onClose}>
+              <i data-lucide="x"></i>
+            </button>
+          </div>
+
+          <div className="conteiner-fields">
+            {filtersLayout.map(renderLayout)}
+          </div>
+
+          <div className="conteiner-btnFiltros">
+            <button type="reset" className="btn-secundario" onClick={onClear}>
+              Limpar
+            </button>
+
+            <button type="button" className="btn-primario" onClick={() => {onApply(payload), onClose()}}>
+              Filtrar
+            </button>
+          </div>
+
+        </form>
+      </div>
+    )
+  }
+</script>
+
+<style>
+  .tela-filtros {
+    position: absolute;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 888;
+    background: rgba(0, 0, 0, 0.15);
+
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+
+    box-sizing: border-box;
+  }
+
+  .tela-filtros.fade-in {
+    display: flex;
+    animation: fadeIn 0.45s forwards;
+  }
+
+  .form-filtros {
+    background-color: white;
+    min-width: 500px;
+    max-width: 700px;
+    width: fit-content;
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  }
+
+  .conteiner-periodos {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .conteiner-btnFiltros {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    max-width: 300px;
+    margin-left: auto;
+    margin-top: 20px;
+  }
+
+  .conteiner-fields {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .conteiner-ckFiltros,
+  .conteiner-selects-filtros {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .conteiner-selects-filtros {
+    flex-direction: column;
+  }
+
+  .conteiner-title-filters {
+    display: flex;
+    width: 100%;
+    height: 30px;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px
+  }
+
+  .conteiner-title-filters button,
+  .header-faturas-cliente button {
+    width: 25px;
+    height: 25px;
+    padding: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    cursor: pointer;
+    border-radius: 50%;
+  }
+
+  .conteiner-title-filters button svg,
+  .header-faturas-cliente button svg {
+    color: #626262;
+  }
+
+  .conteiner-title-filters button:hover,
+  .header-faturas-cliente button:hover {
+    background-color: var(--cor-fundo);
+  }
+
+  .tela-filtros h1 {
+    font-weight: 400;
+    font-size: 18px;
+  }
+
+  .tbl-filtros {
+    margin: 20px 0 8px 0;
+    font-weight: 500;
+  }
+
+  .conteiner-ckFiltros {
+    margin-bottom: 20px;
+    display: flex;
+    flex-wrap: wrap;
+  }
+
+  .ck-label input[type="checkbox"],
+  .ck-label input[type="radio"] {
+    display: none;
+  }
+
+  .ck-label {
+    padding: 5px 16px;
+    border: 1px solid var(--cor-navebar);
+    border-radius: 30px;
+    cursor: pointer;
+    color: var(--cor-navebar);
+    font-weight: 400;
+    transition: background 0.3s;
+    user-select: none;
+    white-space: nowrap;
+  }
+
+  .ck-label:hover {
+    background: var(--cor-verde-padrao);
+    border: 1px solid var(--cor-verde-padrao);
+    color: white;
+  }
+
+  .ck-label:has(input[type="checkbox"]:checked),
+  .ck-label:has(input[type="radio"]:checked) {
+    background: var(--cor-verde-padrao);
+    border: 1px solid var(--cor-verde-padrao);
+    color: white;
+  }
+
+  .radio-group {
+    display: flex;
+    gap: 10px;
+  }
+
+  .radio-group input[type="radio"],
+  .radio-group input[type="checkbox"] {
+    display: none;
+  }
+
+  .radio-label {
+    padding: 8px 16px;
+    border: 2px solid var(--cor-navebar);
+    border-radius: 8px;
+    cursor: pointer;
+    color: var(--cor-navebar);
+    font-weight: 600;
+    transition: background 0.3s;
+    user-select: none;
+  }
+
+  .radio-label:hover {
+    background: var(--cor-verde-padrao);
+    border: 2px solid var(--cor-verde-padrao);
+    color: white;
+  }
+
+  .radio-group input[type="radio"]:checked+.radio-label,
+  .radio-group input[type="checkbox"]:checked+.radio-label {
+    background: var(--cor-verde-padrao);
+    border: 2px solid var(--cor-verde-padrao);
+    color: white;
+  }
+</style>

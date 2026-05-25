@@ -14,7 +14,34 @@
       },
       refetchOnWindowFocus: false,
       staleTime: 1000 * 60 * 5,
-      enabled: !!id
+      retry: false,
     });
+  }
+
+  function useClientesList(filters = null) {
+    return useQuery({
+      queryKey: ['clientes-list', filters],
+      queryFn: () => googleFetch().get('clientes', filters),
+      refetchOnWindowFocus: false,
+      staleTime: 1000 * 60 * 5,
+      retry: false,
+      enabled: true
+    });
+  }
+
+  function useSaveCliente(onClose) {
+    return useMutation({
+      mutationFn: (body) => {
+        return body.id
+          ? googleFetch().put(`clientes/${body.id}`, body)
+          : googleFetch().post('clientes', body)
+      },
+      onSuccess: async () => {
+        await window.queryClient.invalidateQueries({ queryKey: ['clientes-list'] });
+        await window.queryClient.invalidateQueries({ queryKey: ['record-clientes'] });
+        await window.queryClient.invalidateQueries({ queryKey: ['cobranca'] });
+        onClose();
+      }
+    })
   }
 </script>

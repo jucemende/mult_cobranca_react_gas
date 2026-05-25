@@ -1,0 +1,337 @@
+<script type="text/babel">
+
+  const FormFaturas = ({onClose, record}) => {
+
+    const id = record?.id || null
+    const codCliente = record?.codCliente || null
+
+    // Buscando dados da fatura se editando, ou dados do cliente se criando
+    const { data: faturasData, isLoading: isLoadingFaturas } = useFaturas(id);
+    const { data: clientesData, isLoading: isLoadingClientes } = useClientes(record?.clienteId);
+    const { data: clientesListData, isLoading: isLoadingClientesList } = useClientesList();
+    
+    const saveFatura = useSaveFatura(onClose);
+
+    const [formData, setFormData] = React.useState({
+      documento: '',
+      codCliente: '',
+      cliente: '',
+      vencimento: '',
+      vlrLiquido: '',
+      possuiEncargos: false,
+    })
+
+    const handleInputChange = (e) => {
+      const { name, value, type, checked } = e.target;
+      setFormData((prev) => ({
+        ...prev,
+        [name]: type === 'checkbox' ? checked : value,
+      }));
+    };
+
+    const parseValue = (value) => {
+      const cleanString = value.toString().replace(/[R$\s.]/g, "").replace(",", ".");
+      return parseFloat(cleanString) || 0
+    }
+
+    const handleSubmit = (e) => {
+      e.preventDefault();
+      
+      if (!formData.documento || !formData.codCliente || !formData.vencimento || !formData.vlrLiquido) {
+        showToast("Preencha todos os campos obrigatórios", "error");
+        return;
+      }
+
+      const submitData = {
+        ...(id && { id }),
+        documento: parseInt(formData.documento),
+        codCliente: parseInt(formData.codCliente),
+        vencimento: new Date(formData.vencimento).toISOString(),
+        vlrLiquido: parseValue(formData.vlrLiquido),
+        possuiEncargos: formData.possuiEncargos,
+      };
+
+      saveFatura.mutate(submitData);
+    };
+
+    const handleTypeDoc = (typeDoc) => {
+
+      if (typeDoc === 'REEMBOLSO') {
+        return false
+      }
+
+      return true
+    }
+
+    React.useEffect(() => {
+      if (id && faturasData?.response?.data) {
+        const fatura = faturasData.response.data;
+        setFormData({
+          documento: fatura.documento || '',
+          codCliente: fatura.codCliente || '',
+          cliente: fatura.cliente || '',
+          vencimento: new Date(fatura.vencimento).toISOString().split('T')[0],
+          vlrLiquido: parseValue(fatura.vlrLiquido) || '',
+          possuiEncargos:  handleTypeDoc(fatura.tipoDocumento),
+        });
+
+
+      } else if (codCliente && clientesData?.response?.data) {
+        // Se está criando para um cliente específico
+        const cliente = clientesData.response.data;
+        setFormData((prev) => ({
+          ...prev,
+          codCliente: cliente.cod || '',
+          cliente: cliente.cliente || '',
+        }));
+      } else if (record?.cliente) {
+        // Se vem do record da tabela
+        setFormData((prev) => ({
+          ...prev,
+          codCliente: record.codCliente || '',
+          cliente: record.cliente || '',
+        }));
+      }
+    }, [id, faturasData, codCliente, clientesData, record])
+
+    // Transformar clientes para o formato do Select
+    const clientesOptions = clientesListData?.response?.data?.map(cliente => ({
+      key: cliente.cod,
+      value: cliente.cliente
+    })) || [];
+
+    const handleClienteSelect = (e) => {
+      const codCliente = parseInt(e.target.value);
+      const clienteSelecionado = clientesListData?.response?.data?.find(c => c.cod === codCliente);
+      
+      if (clienteSelecionado) {
+        setFormData(prev => ({
+          ...prev,
+          codCliente: clienteSelecionado.cod || '',
+          cliente: clienteSelecionado.cliente || ''
+        }));
+      }
+    };
+
+    const isLoading = isLoadingFaturas || isLoadingClientes || isLoadingClientesList;
+    const isEditing = !!id;
+
+    const formRef = React.useRef(null);
+
+    React.useEffect(() => {
+      if (window.lucide && formRef.current) {
+        const icons = formRef.current.querySelectorAll('i[data-lucide]');
+        if (icons.length) window.lucide.createIcons({ nodes: [...icons] });
+      }
+    }, [isLoading, saveFatura.isLoading]);
+
+    return (
+      <div className="drawer-faturas" id="drawer-faturas" ref={formRef}>
+        
+        <form className="form-faturas" onSubmit={handleSubmit}>
+
+          <h3>{isEditing ? 'Editar Fatura' : 'Cadastro de Faturas'}</h3>
+
+          { isLoading ? ( 
+            <Loading />
+          ) : (
+            <div className="conteiner-faturas">
+
+              <div className="info-group">
+                <label>Cód. Cliente</label>
+                <input
+                  className="cod-cliente"
+                  type="number"
+                  name="codCliente"
+                  readonly=""
+                  value={formData.codCliente}
+                  onChange={handleInputChange}
+                />
+              </div>
+
+              <Select
+                label="Nome do Cliente"
+                name="cliente"
+                value={formData.codCliente}
+                onChange={handleClienteSelect}
+                options={clientesOptions}
+              />
+
+              <div className="info-group">
+                <label>Documento</label>
+                <input
+                  type="number"
+                  name="documento"
+                  placeholder="Ex: 141881"
+                  value={formData.documento}
+                  onChange={handleInputChange}
+                  required
+                />
+              </div>
+
+              <div className="info-group">
+                <label>Data de Vencimento</label>
+                <input
+                  type="date"
+                  name="vencimento"
+                  value={formData.vencimento}
+                  onChange={handleInputChange}
+                  required
+                />
+              </div>
+
+              <div className="info-group">
+                <label>Valor Líquido</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  name="vlrLiquido"
+                  placeholder="Ex: 550.00"
+                  value={formData.vlrLiquido}
+                  onChange={handleInputChange}
+                  required
+                />
+              </div>
+
+              <div className="radio-group">
+                <input
+                  className="info-form-fatura"
+                  type="checkbox"
+                  id="possuiEncargos"
+                  name="possuiEncargos"
+                  checked={formData.possuiEncargos}
+                  onChange={handleInputChange}
+                />
+                <label htmlFor="possuiEncargos" className="radio-label">Possui Encargos</label>
+              </div>
+
+            </div>
+          )}
+
+          <div style={{ marginTop: 'auto', display: 'flex', gap: '8px' }}>
+            <button type="submit" className="btn-primario" disabled={saveFatura.isLoading}>
+              {saveFatura.isLoading ? 'Salvando...' : 'Salvar'}
+            </button>
+
+            <button type="button" className="btn-secundario" onClick={onClose}>
+              Cancelar
+            </button>
+          </div>
+
+        </form>
+      </div>
+    )
+  }
+</script>
+
+<style>
+
+  .drawer-faturas{
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 450px;
+    height: 100%;
+    background-color: #ffffff;
+    border-left: 1px solid #ddd;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    z-index: 10;
+    box-shadow: 2px 0 6px rgba(0, 0, 0, 0.2);
+    overflow: auto;
+    padding: 16px;
+  }
+
+  .form-faturas {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    height: 100%;
+  }
+
+  .form-faturas h3 {
+    color: var(--cor-verde-padrao);
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+
+  .conteiner-faturas {
+    overflow: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    flex: 1;
+  }
+
+  .info-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .info-group label {
+    font-weight: 500;
+    color: #626262;
+  }
+
+  .info-group input {
+    padding: 8px 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    font-size: 13px;
+  }
+
+  .info-group input:focus {
+    border-color: var(--cor-verde);
+    outline: none;
+    box-shadow: 0 0 6px rgba(76, 175, 80, 0.3);
+  }
+
+  .info-group input[readonly] {
+    background-color: #f5f5f5;
+    color: #999;
+    cursor: not-allowed;
+  }
+
+  .radio-group {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .radio-group input[type="radio"],
+  .radio-group input[type="checkbox"] {
+    width: auto;
+    margin: 0;
+    cursor: pointer;
+  }
+
+  .radio-label {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-bottom: 0;
+    cursor: pointer;
+    font-weight: 400;
+    width: auto;
+  }
+
+  .checkbox-group {
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .checkbox-group input[type="checkbox"] {
+    width: auto;
+  }
+
+  .checkbox-group label {
+    margin: 0;
+  }
+
+</style>

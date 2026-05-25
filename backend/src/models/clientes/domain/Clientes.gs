@@ -149,20 +149,20 @@ class Cliente {
     if (!valor) return null;
 
     // Extrai apenas os números
-    const documento = valor.toString().replace(/\D/g, '');
+    //const documento = valor.toString().replace(/\D/g, '');
     
     const { tipoPessoa } = getEnunsClientes();
 
     // Verifica se é CPF (11) ou CNPJ (14) baseado no tipo definido
-    const ehCpfValido = this._tipo === tipoPessoa.CPF && documento.length === 11;
-    const ehCnpjValido = this._tipo === tipoPessoa.CNPJ && documento.length === 14;
+    const ehCpfValido = this._tipo === tipoPessoa.CPF && valor.length === 14;
+    const ehCnpjValido = this._tipo === tipoPessoa.CNPJ && valor.length === 18;
 
     if (ehCpfValido || ehCnpjValido) {
-      return documento;
+      return valor;
     }
 
     // Se chegou aqui, o tamanho está errado para o tipo selecionado
-    throw new Error(`O ${this._tipo} deve conter exatamente ${this._tipo === tipoPessoa.CPF ? '11' : '14'} dígitos.`);
+    throw new Error(`O ${this._tipo} deve conter exatamente ${this._tipo === tipoPessoa.CPF ? '14' : '18'} dígitos.`);
   }
 
   _validaPerimissao(valor) {

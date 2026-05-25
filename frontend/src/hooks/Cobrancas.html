@@ -20,7 +20,24 @@
       },
       refetchOnWindowFocus: false,
       staleTime: 1000 * 60 * 1,
+      retry: false,
       enabled: !!rotas[aba]
+    });
+  }
+
+  function useHistorico(documento) {
+    return useQuery({
+      queryKey: ['historico', documento],
+      queryFn: () => {
+        let endpoint = `cobrancas-list/${documento}`
+
+        return googleFetch().get(endpoint)
+        
+      },
+      refetchOnWindowFocus: false,
+      staleTime: 1000 * 60 * 1,
+      retry: false,
+      enabled: !!documento
     });
   }
 
@@ -32,6 +49,7 @@
       },
       refetchOnWindowFocus: false,
       staleTime: 1000 * 60 * 5,
+      retry: false,
     });
   }
 
@@ -49,17 +67,32 @@
 
   function useSendEmail() {
     
-    const queryClient = useQueryClient()
-
     return useMutation({
       mutationFn: (body) => {
         return googleFetch().post(`cobrancas-sendCharge`, body);
       },
       onSuccess: (response) => {
-        queryClient.invalidateQueries({ queryKey: ['cobranca'] });
+        window.queryClient.invalidateQueries({ queryKey: ['cobranca'] });
         showToast("Operação realizada com sucesso!", "success")
       }
     });
+  }
+
+  function useSaveCobranca(onClose) {
+    
+    return useMutation({
+      mutationFn: (body) => {
+        return googleFetch().post('cobrancas', body)
+      },
+      onSuccess: async (response) => {
+        showToast("Operação realizada com sucesso!", "success")
+        await window.queryClient.invalidateQueries({
+          queryKey: ['cobranca'],
+          refetchActive: true
+        })
+        onClose()
+      }
+    })
   }
 
 </script>

@@ -1,14 +1,13 @@
+// backend/src/models/encargos/interface/EncargosController.gs
+
 function testEncargosController() {
 
   const id = ''
-  const params = {
-    //search: { op: '=', value: 'JUR' },
-    //taxaJuros: { op: '>=', value: 0.02 }
-  }
+  const params = {}
 
   const controller = EncargosController
 
-  const data = controller.get({id, params})
+  const data = controller.get({ id, params })
 
   console.log(data)
 }
@@ -23,23 +22,17 @@ class EncargosController {
   }
 
   static get({ id = null, params = {} }) {
-    
-    const data = () => {
 
-      if(id) {
-        return this.service().getById(id)
+    if (id) {
+      return {
+        data: this.service().getById(id)
       }
-    
-      return this.service().getAll(params);
-
     }
-
-    const { tableConfig, filterConfig } = getConfigEncargo()
 
     return {
-      data: data(),
-      tableConfig
-    }
+      data: this.service().getAll(params),
+      presentation: encargosPresentation()
+    };
 
   }
 

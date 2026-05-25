@@ -2,96 +2,246 @@
   const Cobrancas = () => {
     
     const [abaAtiva, setAbaAtiva] = React.useState('clientes')
-    const [recordBusca, setRecordBusca] = React.useState(null)
-    const [isEdition, setIsEdition] = React.useState(false)
-    const [isCobrar, setIsCobrar] = React.useState(false)
-    const [isFilter, setIsFilter] = React.useState(false)
+    const [activeModal, setActiveModal] = React.useState(null)
+    const [showDropdownFatura, setShowDropdownFatura] = React.useState(false)
+    
+    const [importCsvData, setImportCsvData] = React.useState(null)
+    const [importFileName, setImportFileName] = React.useState(null)
+    const [importError, setImportError] = React.useState(null)
+    const [isImporting, setIsImporting] = React.useState(false)
+    
+    const fileInputRef = React.useRef(null)
+    const dropdownRef = React.useRef(null)
 
-    const debounceRef = React.useRef(null)
+    // Fechar dropdown quando modal é aberto
+    React.useEffect(() => {
+      if (activeModal) {
+        setShowDropdownFatura(false)
+      }
+    }, [activeModal])
 
-    const [filtrosAtivos, setFiltrosAtivos] = React.useState({})
-    const [filtroDebounced, setFiltroDebounced] = React.useState('')
+    // Fechar dropdown quando clicar fora
+    React.useEffect(() => {
+      const handleClickOutside = (event) => {
+        if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+          setShowDropdownFatura(false)
+        }
+      }
 
-    const { data, isLoading, error } = useCobrancas(abaAtiva, filtroDebounced)
+      if (showDropdownFatura) {
+        document.addEventListener('mousedown', handleClickOutside)
+        return () => {
+          document.removeEventListener('mousedown', handleClickOutside)
+        }
+      }
+    }, [showDropdownFatura])
 
+    // Carregar ícones do Lucide quando o dropdown aparecer
+    React.useEffect(() => {
+      if (window.lucide && showDropdownFatura) {
+        setTimeout(() => {
+          const icons = document.querySelectorAll('.dropdown-button-container i[data-lucide]');
+          window.lucide.createIcons({ nodes: [...icons] });
+        }, 0);
+      }
+    }, [showDropdownFatura])
+
+    const {
+      filtros,
+      setFiltro,
+      mergeFiltros,
+      clearFiltros,
+      queryString,
+      handleChange,
+      filtersApllyed
+    } = useFiltros(600)
+
+    const { data, isLoading } = useCobrancas(abaAtiva, queryString)
     const presentation = data?.response?.presentation || {}
 
-    const openForms = (item) => {
-      switch (abaAtiva) {
-        case 'clientes':
-          setRecordBusca(item.clienteId)
-          setIsEdition(true)
-          break
-        case 'faturas':
-        case 'pendencias':
-          setIsEdition(true)
-          break
-        default:
-          break
+    // Totais enviados pelo backend
+    const totais = data?.response?.totais || { vlrLiquido: 0, multa: 0, juros: 0, total: 0 };
+
+    const formatCurrency = (value) =>
+      value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+
+    // Renderização de tabs
+    const tabs = [
+      {key: 'clientes',label: 'Clientes'},
+      {key: 'faturas',label: 'Faturas'},
+      {key: 'pendencias',label: 'Pendencias'}
+    ]
+
+    // Funções de navegação de tabs
+    const handleClickTab = (tab) => {
+      setAbaAtiva(tab)
+      setActiveModal(null)
+    }
+
+    const isTotais = false
+    // Renderização de totalizadores
+    const minDash = [
+      {label: 'Em Aberto', value: 'R$ 0,00'}, // passar o retorno do backend
+      {label: 'Baixadas', value: 'R$ 0,00'},
+      {label: 'Cobradas', value: 'R$ 0,00'},
+      {label: 'Última Atualização', value: '01/01/1900', class: 'label-atualizacao'}
+    ]
+
+    // Totais do rodapé
+    const totaliserRodape = [
+      {label: 'Valor Líquido', value: formatCurrency(totais.vlrLiquido)},
+      {label: 'Multa', value: formatCurrency(totais.multa)},
+      {label: 'Juros', value: formatCurrency(totais.juros)},
+      {label: 'Total', value: formatCurrency(totais.total)}
+    ]
+
+    // Função responsavel por lidar com os forms
+    const handleAction = ({ modal, record }) => {
+      setActiveModal({ modal, record })
+    }
+
+    const handleClose = () => {
+      setActiveModal(null)
+    }
+
+    // Funções responsaveis por lidar com a imprtação
+    const handleOpenImport = () => {
+      setActiveModal({ modal: 'import-faturas' })
+    }
+
+    const normalizeCsv = (content) =>
+      content.replace(/\r\n/g, '\n').replace(/\r/g, '\n')
+
+    const parseCsvLine = (line) => {
+      const result = []
+      let current = ''
+      let inQuotes = false
+
+      for (const char of line) {
+        if (char === '"') {
+          inQuotes = !inQuotes
+          continue
+        }
+
+        if (char === ';' && !inQuotes) {
+          result.push(current.trim())
+          current = ''
+          continue
+        }
+
+        current += char
       }
+
+      result.push(current.trim())
+
+      return result.map(v => v.replace(/^"|"$/g, ''))
     }
 
-    // debounce isolado do input
-    const handleChange = (value) => {
-      if (debounceRef.current) {
-        clearTimeout(debounceRef.current)
+    const csvToJson = (content) => {
+      const lines = normalizeCsv(content)
+        .split('\n')
+        .filter(Boolean)
+
+      if (lines.length < 2) {
+        throw new Error('CSV inválido.')
       }
 
-      debounceRef.current = setTimeout(() => {
-        setFiltrosAtivos(prev => {
-          const novo = { ...prev }
+      const headers = parseCsvLine(lines[2])
 
-          if (value && value.trim() !== '') {
-            novo.search = { op: '=', value }
-          } else {
-            delete novo.search
-          }
+      return lines.slice(4).map(line => {
+        const values = parseCsvLine(line)
 
-          return novo
-        })
-      }, 600)
-    }
-
-    // monta query string sem mutar estado
-    React.useEffect(() => {
-      const queryString = Object.keys(filtrosAtivos)
-        .filter(key => {
-          const v = filtrosAtivos[key]?.value
-          return v && v.toString().trim() !== ''
-        })
-        .map(key => {
-          const { value, op } = filtrosAtivos[key]
-          return `${encodeURIComponent(key)}${op}${value}`
-        })
-        .join('&')
-
-      setFiltroDebounced(queryString)
-    }, [filtrosAtivos])
-
-    const handleApplyFiltros = (dadosDoForm) => {
-      setFiltrosAtivos(prev => ({
-        ...prev,
-        ...dadosDoForm
-      }))
-      setIsFilter(false)
-    }
-
-    const handleClearFiltros = () => {
-      setFiltrosAtivos(prev => {
-        return prev.search ? { search: prev.search } : {}
+        return headers.reduce((obj, key, index) => {
+          obj[key] = values[index] ?? ''
+          return obj
+        }, {})
       })
-      setIsFilter(false)
     }
 
-    // executa apenas quando necessário
-    React.useEffect(() => {
-      if (window.lucide) {
-        window.lucide.createIcons()
+    const readFileContent = async (file) => {
+      const buffer = await file.arrayBuffer()
+
+      try {
+        // tenta UTF-8 primeiro
+        return new TextDecoder('utf-8', { fatal: true }).decode(buffer)
+      } catch {
+        // fallback comum em CSV brasileiro
+        return new TextDecoder('latin1').decode(buffer)
       }
-    }, [isCobrar, isEdition, isFilter])
+    }
+
+    const handleFileSelected = async (event) => {
+      setImportError(null)
+
+      const file = event.target.files?.[0]
+      if (!file) return
+
+      try {
+        const content = await readFileContent(file)
+
+        const data = csvToJson(content)
+
+        setImportCsvData(data)
+        setImportFileName(file.name)
+
+      } catch (error) {
+        setImportError(error.message || 'Falha ao ler CSV')
+      }
+    }
+
+    const handleChooseFile = () => {
+      if (fileInputRef.current) {
+        fileInputRef.current.value = ''
+        fileInputRef.current.click()
+      }
+    }
+
+    const handleSubmitImport = async () => {
+      if (!importCsvData?.length) {
+        setImportError('Selecione um CSV válido.')
+        return
+      }
+
+      try {
+        setIsImporting(true)
+
+        await googleFetch().post('faturas-import', {
+          data: importCsvData
+        })
+
+        showToast('Relatório importado com sucesso!', 'success')
+
+        window.queryClient?.invalidateQueries({
+          queryKey: ['cobranca']
+        })
+
+        window.queryClient?.invalidateQueries({
+          queryKey: ['clientes']
+        })
+
+        handleClose()
+
+      } catch (err) {
+        setImportError(err.message || 'Falha ao importar relatório.')
+      } finally {
+        setIsImporting(false)
+      }
+    }
+
+    // Função para lidar com o filtro avancado
+    const handleSearchChange = (value) => {
+      handleChange(value)
+    }
+
+    const handleClearFilters = () => {
+      setActiveModal(null)
+      if(Object.keys(filtersApllyed).length) {
+        clearFiltros()
+      }
+    }
 
     return (
-      <div>
+      <>
         <div className="conteiner-titulo-pag">
           <div id="conteiner-title-pag">
             <h1>Gestão de Cobranças</h1>
@@ -99,56 +249,69 @@
           </div>
           
           <div id="container-btns-title">
-            <button className="btn-primario btn-title">
-              <i data-lucide="plus"></i>
-              <span>Adicionar Fatura</span>
-            </button>
+            <div className="dropdown-button-container" ref={dropdownRef}>
+              <button 
+                className="btn-primario btn-title"
+                onClick={() => setShowDropdownFatura(!showDropdownFatura)}
+              >
+                <i data-lucide="plus"></i>
+                <span>Adicionar Fatura</span>
+                <i data-lucide="chevron-down" className={`chevron-icon ${showDropdownFatura ? 'active' : ''}`}></i>
+              </button>
+              
+              {showDropdownFatura && (
+                <div className="dropdown-menu">
+                  <button 
+                    type="button"
+                    className="dropdown-item"
+                    onClick={() => {
+                      setActiveModal({ modal: 'create-fatura' })
+                      setShowDropdownFatura(false)
+                    }}
+                  >
+                    <i data-lucide="file-plus"></i>
+                    <span>Nova Fatura</span>
+                  </button>
+                  
+                  <button 
+                    type="button"
+                    className="dropdown-item"
+                    onClick={() => {
+                      handleOpenImport()
+                      setShowDropdownFatura(false)
+                    }}
+                  >
+                    <i data-lucide="upload"></i>
+                    <span>Importar Relatório</span>
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
         <div className="conteiner-btn-seguimentacao">
-          <button 
-            className={`btn-seguimentoRegua ${abaAtiva === 'clientes' ? 'ativo' : ''}`}
-            onClick={() => {setAbaAtiva('clientes'), setIsEdition(false), setIsCobrar(false)}}
-          >
-            <span>Clientes</span>
-          </button>
-
-          <button
-            className={`btn-seguimentoRegua ${abaAtiva === 'faturas' ? 'ativo' : ''}`}
-            onClick={() => {setAbaAtiva('faturas'), setIsEdition(false), setIsCobrar(false)}}
-          >
-            <span>Faturas</span>
-          </button>
-
-          <button
-            className={`btn-seguimentoRegua ${abaAtiva === 'pendencias' ? 'ativo' : ''}`}
-            onClick={() => {setAbaAtiva('pendencias'), setIsEdition(false), setIsCobrar(false)}}
-          >
-            <span>Pendências</span>
-          </button>
+          {tabs.map(tab => (
+            <button
+              key={tab.key}
+              className={`btn-seguimentoRegua ${abaAtiva === tab.key ? 'ativo' : ''}`}
+              onClick={() => handleClickTab(tab.key)}
+            >
+              <span>{tab.label}</span>
+            </button>
+          ))}
         </div>
 
-        <div class="conteiner-totais-seguimentacao">
-
-          <div class="totais-seguimentacao">
-            <p class="label-totais">Em Aberto</p>
-            <p id="totalAberto" class="campo-totais">R$ 0,00</p>
+        {isTotais && 
+          <div class="conteiner-totais-seguimentacao">
+            {minDash.map(item => (
+              <div className="totais-seguimentacao">
+                <p className={item?.class ||  "label-totais"}>{item.label}</p>
+                <p className="campo-totais">{item.value}</p>
+              </div>
+            ))}
           </div>
-          <div class="totais-seguimentacao">
-            <p class="label-totais">Baixadas</p>
-            <p id="totalBaixado" class="campo-totais">R$ 0,00</p>
-          </div>
-          <div class="totais-seguimentacao">
-            <p class="label-totais">Cobradas</p>
-            <p id="totalCobrado" class="campo-totais">R$ 0,00</p>
-          </div>
-          <div class="totais-seguimentacao">
-            <p class="label-atualizacao">Última Atualização</p>
-            <p id="dtUltimaAtualizacao">01/01/1900</p>
-          </div>
-
-        </div>
+        }
 
         <div className="container-filtros">
           <div className="busca-avancada">
@@ -156,7 +319,7 @@
             <input
               className="input-buscaAvancada"
               placeholder="Buscar..."
-              onChange={(e) => handleChange(e.target.value)}
+              onChange={(e) => handleSearchChange(e.target.value)}
             />
           </div>
 
@@ -164,12 +327,11 @@
             <button 
               type="button"
               className="btn-secundario"
-              enabled={isLoading}
-              onClick={() => setIsFilter(true)}
+              onClick={() => setActiveModal({ modal: 'filtrar' })}
             >
               Filtros
               <i data-lucide="funnel"></i>
-              <div className="count-filtros" id="count-filtros">{Object.keys(filtrosAtivos).length}</div>
+              <div className="count-filtros" id="count-filtros">{Object.keys(filtersApllyed).length}</div>
             </button>
 
             <div className="container-filtrado" id="tagsFiltradas"></div>
@@ -180,35 +342,96 @@
           presentation={presentation}
           data={data?.response?.data || []}
           isLoading={isLoading}
-          actionHandlers={{
-            edit: (item) => openForms(item),
-            cobrar: (item) => {
-              setRecordBusca(item.codCliente)
-              setIsCobrar(true)
-            }
-          }}
+          actionHandlers={handleAction}
+          activeModal={activeModal}
         />
 
-        { isEdition && (
-          <>
-            {abaAtiva === 'clientes' &&(
-              <FormCliente onClose={() => setIsEdition(false)} id={recordBusca}/>
-            )}
-          </>
-        )}
+        
+        {abaAtiva != 'pendencias' &&
+          <div className="totais-container">
+            <div>
+              <p className="caption">Valor Líquido</p>
+              <p id="totalOriginal-fatura">{formatCurrency(totais.vlrLiquido)}</p>
+            </div>
+            <div>
+              <p className="caption">Multa</p>
+              <p id="totalMulta-fatura">{formatCurrency(totais.multa)}</p>
+            </div>
+            <div>
+              <p className="caption">Juros</p>
+              <p id="totalJuros-fatura">{formatCurrency(totais.juros)}</p>
+            </div>
+            <div>
+              <p className="caption">Total</p>
+              <p id="totalGeral-fatura">{formatCurrency(totais.total)}</p>
+            </div>
+          </div>
+        }
 
-        { isCobrar && <FormCobrancas onClose={() => setIsCobrar(false)} codCliente={recordBusca} /> }
-        { isFilter && 
+        {activeModal?.modal === 'edit-clientes' &&
+          <FormCliente onClose={handleClose} record={activeModal?.record}/>
+        }
+
+        {activeModal?.modal === `cobrar` &&
+          <FormCobrancas onClose={handleClose} record={activeModal?.record} />
+        }
+
+        {activeModal?.modal === 'filtrar' &&
           <FormFiltro 
-            onClose={() => setIsFilter(false)}
-            currentValues={filtrosAtivos}
-            filters={presentation?.filters} 
-            onApply={handleApplyFiltros} 
-            onClear={handleClearFiltros}
+            onClose={handleClose}
+            currentValues={filtros}
+            presentation={presentation} 
+            onApply={mergeFiltros} 
+            onClear={handleClearFilters}
           /> 
         }
 
-      </div>
+        {activeModal?.modal === 'history' &&
+          <FormHistorico record={activeModal?.record} onClose={handleClose} />
+        }
+
+        {activeModal?.modal === 'create-fatura' &&
+          <FormFaturas onClose={handleClose} record={null}/>
+        }
+
+        {activeModal?.modal === 'import-faturas' &&
+          <div className="modal-confirm" style={{ display: 'flex' }}>
+            <div className="modal-content">
+              <p>Importar Relatório de Faturas</p>
+              <div className="import-file-card">
+                <button type="button" className="btn-secundario" onClick={handleChooseFile}>
+                  Selecionar arquivo CSV
+                </button>
+                {importFileName && <p className="import-file-name">{importFileName}</p>}
+                {importError && <p className="import-error">{importError}</p>}
+              </div>
+              <div className="modal-buttons">
+                <button type="button" className="btn-secundario" onClick={handleClose}>Cancelar</button>
+                <button
+                  type="button"
+                  className="btn-primario"
+                  disabled={!importCsvData || isImporting}
+                  onClick={handleSubmitImport}
+                >
+                  {isImporting ? 'Importando...' : 'Importar'}
+                </button>
+              </div>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".csv"
+                style={{ display: 'none' }}
+                onChange={handleFileSelected}
+              />
+            </div>
+          </div>
+        }
+
+        {activeModal?.modal === 'edit-fatura' &&
+          <FormFaturas onClose={handleClose} record={activeModal?.record}/>
+        }
+
+      </>
     );
   }
 </script>
@@ -403,5 +626,168 @@
 
   .campo-totais {
     font-weight: 500;
+  }
+
+  .totais-container div:not(:last-child) {
+    border-right: 1px solid rgba(76, 175, 80, 0.15);
+  }
+
+  .caption {
+    margin-bottom: 6px;
+  }
+
+  /* Estilos do Dropdown de Sub-buttons */
+  #container-btns-title {
+    display: flex;
+    align-items: flex-end;
+  }
+
+  .dropdown-button-container {
+    position: relative;
+    width: 100%;
+  }
+
+  .dropdown-button-container .btn-primario {
+    width: fit-content;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    position: relative;
+  }
+
+  .chevron-icon {
+    width: 16px;
+    height: 16px;
+    transition: transform 0.3s ease;
+    transform: rotate(0deg);
+  }
+
+  .chevron-icon.active {
+    transform: rotate(180deg);
+  }
+
+  .dropdown-menu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    min-width: 200px;
+    margin-top: 4px;
+    z-index: 20;
+    animation: slideDown 0.2s ease-out;
+  }
+
+  @keyframes slideDown {
+    from {
+      opacity: 0;
+      transform: translateY(-8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 12px 16px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 13px;
+    color: #626262;
+    transition: all 0.2s ease;
+    text-align: left;
+    font-weight: 400;
+  }
+
+  .dropdown-item:first-child {
+    border-radius: 8px 8px 0 0;
+  }
+
+  .dropdown-item:last-child {
+    border-radius: 0 0 8px 8px;
+  }
+
+  .dropdown-item:hover {
+    background-color: #f5f5f5;
+    color: var(--cor-verde-padrao);
+  }
+
+  .dropdown-item svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .dropdown-item span {
+    flex: 1;
+  }
+
+  .modal-confirm {
+    position: fixed;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    padding: 15px;
+    z-index: 9999;
+    background: rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(4px);
+  }
+
+  .modal-confirm .modal-content {
+    width: 420px;
+    max-width: 100%;
+    background-color: white;
+    padding: 28px;
+    border-radius: 16px;
+    box-shadow: 0 14px 30px rgba(0, 0, 0, 0.12);
+  }
+
+  .import-file-card {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+
+  .import-file-name {
+    color: #444;
+    font-size: 14px;
+    margin: 0;
+  }
+
+  .import-error {
+    color: #b00020;
+    font-size: 14px;
+    margin: 0;
+  }
+
+  .modal-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+  }
+
+  .btn-primario[disabled] {
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+
+  @media (max-width: 850px) {
+    .totais-container {
+      flex-wrap: wrap;
+      height: auto;
+      padding: 10px 0;
+    }
   }
 </style>

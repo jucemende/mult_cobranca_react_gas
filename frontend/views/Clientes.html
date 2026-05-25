@@ -1,9 +1,193 @@
 <script type="text/babel">
   const Clientes = () => {
+    const [activeModal, setActiveModal] = React.useState(null);
+
+    const {
+      filtros,
+      setFiltro,
+      mergeFiltros,
+      clearFiltros,
+      queryString,
+      handleChange,
+      filtersApllyed
+    } = useFiltros(600);
+
+    const { data, isLoading, error } = useClientesList(queryString);
+    const clientes = data?.response?.data || [];
+    const presentation = data?.response?.presentation || {};
+
+    const handleAction = ({ modal, record }) => {
+      setActiveModal({ modal, record });
+    };
+
+    const handleClose = () => {
+      setActiveModal(null);
+    };
+
+    const handleClearFilters = () => {
+      setActiveModal(null)
+      if (Object.keys(filtersApllyed).length) {
+        clearFiltros();
+      }
+    };
+
     return (
-      <div>
-        <h1>Gestão de Clientes</h1>
-      </div>
+      <>
+        <div className="conteiner-titulo-pag">
+          <div id="conteiner-title-pag">
+            <h1>Gestão de Clientes</h1>
+            <p>Visualize e edite sua base de clientes</p>
+          </div>
+
+          <div id="container-btns-title">
+            <button className="btn-primario btn-title" onClick={() => setActiveModal({ modal: 'edit-clientes', record: null })}>
+              <i data-lucide="plus"></i>
+              <span>Adicionar Cliente</span>
+            </button>
+          </div>
+        </div>
+
+        <div className="container-filtros">
+          <div className="busca-avancada">
+            <i data-lucide="search"></i>
+            <input
+              className="input-buscaAvancada"
+              placeholder="Buscar cliente, código ou vendedor..."
+              onChange={(e) => handleChange(e.target.value)}
+            />
+          </div>
+
+          <div className="container-select-filtros">
+            <button
+              type="button"
+              className="btn-secundario"
+              onClick={() => setActiveModal({ modal: 'filtrar' })}
+            >
+              Filtros
+              <i data-lucide="funnel"></i>
+              <div className="count-filtros">{Object.keys(filtersApllyed).length}</div>
+            </button>
+
+            <div className="container-filtrado" id="tagsFiltradas"></div>
+          </div>
+        </div>
+
+        <Table
+          presentation={presentation}
+          data={clientes}
+          isLoading={isLoading}
+          actionHandlers={handleAction}
+          activeModal={activeModal}
+        />
+
+        {activeModal?.modal === 'edit-clientes' &&
+          <FormCliente onClose={handleClose} record={activeModal?.record} />
+        }
+
+        {activeModal?.modal === 'filtrar' &&
+          <FormFiltro
+            onClose={handleClose}
+            currentValues={filtros}
+            presentation={presentation}
+            onApply={mergeFiltros}
+            onClear={handleClearFilters}
+          />
+        }
+      </>
     );
   };
 </script>
+
+<style>
+  .cliente-summary {
+    margin-bottom: 16px;
+    color: #4c4c4c;
+    font-size: 14px;
+    font-weight: 500;
+  }
+
+  .btn-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .btn-title span {
+    font-size: 12px;
+  }
+
+  .btn-title svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .container-filtros {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+
+  .busca-avancada {
+    position: relative;
+    width: 100%;
+    max-width: 360px;
+  }
+
+  .busca-avancada input {
+    width: 100%;
+    padding: 10px 12px 10px 36px;
+    border-radius: 10px;
+    border: 1px solid #d6d6d6;
+    outline: none;
+  }
+
+  .busca-avancada svg {
+    position: absolute;
+    top: 50%;
+    left: 12px;
+    transform: translateY(-50%);
+    color: #626262;
+    width: 18px;
+    height: 18px;
+    pointer-events: none;
+  }
+
+  .container-select-filtros {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .container-select-filtros .btn-secundario {
+    width: fit-content;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 8px 18px;
+    border-radius: 50px;
+  }
+
+  .container-select-filtros .btn-secundario svg {
+    width: 18px;
+    height: 18px;
+    pointer-events: none;
+  }
+
+  .count-filtros {
+    background-color: var(--cor-navebar);
+    color: white;
+    width: fit-content;
+    height: fit-content;
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: 10px;
+  }
+
+  .container-filtrado {
+    display: flex;
+    gap: 10px;
+  }
+</style>

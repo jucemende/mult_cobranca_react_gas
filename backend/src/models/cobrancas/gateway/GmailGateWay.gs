@@ -7,7 +7,6 @@ class GmailGateWay {
 
   send(emailPayload) {
     
-    return `Enviando email: ${emailPayload.to}`
     
     const cotaRestante = MailApp.getRemainingDailyQuota();
 
@@ -30,13 +29,13 @@ class GmailGateWay {
 
       return {
         success: true,
-        message: "finalizado"
+        message: "FINALIZADO"
       };
       
     } catch(error) {
       return {
         success: false,
-        message: 'naoEncontrado'
+        message: 'FALHA'
       }
     }
 

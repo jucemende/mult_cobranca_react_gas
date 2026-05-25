@@ -23,7 +23,7 @@ function TesteApp() {
     }
   }
 
-  request = {url: 'faturas-agrupadas'}
+  request = {url: 'cobrancas-view/424'}
 
   const res = app(request)
 
@@ -34,10 +34,11 @@ function TesteApp() {
 const RouterRegistry = {
   encargos: EncargosRouters,
   reguas: ReguaRouters,
-  vendedors: VendedorRouters,
+  vendedores: VendedorRouters,
   clientes: ClienteRouters,
   faturas: FaturasRouters,
-  cobrancas: CobrancasRouters
+  cobrancas: CobrancasRouters,
+  dashboard:  DashboardRouters,
 };
 
 function app(request) {
@@ -91,10 +92,6 @@ function coerceValue(value) {
 
   if (value === 'true') return true;
   if (value === 'false') return false;
-
-  if (!isNaN(value) && value.trim() !== '') {
-    return Number(value);
-  }
 
   return value;
 }

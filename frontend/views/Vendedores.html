@@ -1,9 +1,99 @@
 <script type="text/babel">
   const Vendedores = () => {
+    const [activeModal, setActiveModal] = React.useState(null);
+
+    const {
+      filtros,
+      setFiltro,
+      mergeFiltros,
+      clearFiltros,
+      queryString,
+      handleChange,
+      filtersApllyed
+    } = useFiltros(600);
+
+    const { data, isLoading, error } = useVendedoresList(queryString);
+    const vendedores = data?.response?.data || [];
+    const presentation = data?.response?.presentation || {};
+
+    const handleAction = ({ modal, record }) => {
+      setActiveModal({ modal, record });
+    };
+
+    const handleClose = () => {
+      setActiveModal(null);
+    };
+
+    const handleClearFilters = () => {
+      setActiveModal(null)
+      if (Object.keys(filtersApllyed).length) {
+        clearFiltros();
+      }
+    };
+
     return (
-      <div>
-        <h1>Gestão de Vendedores</h1>
-      </div>
+      <>
+        <div className="conteiner-titulo-pag">
+          <div id="conteiner-title-pag">
+            <h1>Gestão de Vendedores</h1>
+            <p>Visualize e edite sua base de vendedores</p>
+          </div>
+
+          <div id="container-btns-title">
+            <button className="btn-primario btn-title" onClick={() => setActiveModal({ modal: 'edit-vendedores', record: null })}>
+              <i data-lucide="plus"></i>
+              <span>Adicionar Vendedor</span>
+            </button>
+          </div>
+        </div>
+
+        <div className="container-filtros">
+          <div className="busca-avancada">
+            <i data-lucide="search"></i>
+            <input
+              className="input-buscaAvancada"
+              placeholder="Buscar vendedor ou email..."
+              onChange={(e) => handleChange(e.target.value)}
+            />
+          </div>
+
+          <div className="container-select-filtros">
+            <button
+              type="button"
+              className="btn-secundario"
+              onClick={() => setActiveModal({ modal: 'filtrar' })}
+            >
+              Filtros
+              <i data-lucide="funnel"></i>
+              <div className="count-filtros">{Object.keys(filtersApllyed).length}</div>
+            </button>
+
+            <div className="container-filtrado" id="tagsFiltradas"></div>
+          </div>
+        </div>
+
+        <Table
+          presentation={presentation}
+          data={vendedores}
+          isLoading={isLoading}
+          actionHandlers={handleAction}
+          activeModal={activeModal}
+        />
+
+        {activeModal?.modal === 'edit-vendedores' &&
+          <FormVendedor onClose={handleClose} record={activeModal?.record} />
+        }
+
+        {activeModal?.modal === 'filtrar' &&
+          <FormFiltro
+            onClose={handleClose}
+            currentValues={filtros}
+            presentation={presentation}
+            onApply={mergeFiltros}
+            onClear={handleClearFilters}
+          />
+        }
+      </>
     );
   };
 </script>
