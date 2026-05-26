@@ -553,6 +553,10 @@ Tipos de elementos de filtro suportados: `select`, `input`, `date`, `radio`, `ch
 `SQSheets` é um mini-ORM que abstrai o acesso ao Google Sheets:
  
 ```javascript
+// Controle sobre base de desenvolvimento e produção por variaveis de ambiente
+const DEV_ID = 'ID_SHEET_DESENVOLVIMENTO'
+const PROD_ID = 'ID_SHEET_PRODUCAO'
+
 class SQSheets {
   // Lê toda a aba, converte para array de objetos
   load()        // com cache automático em CacheService
@@ -990,8 +994,8 @@ _emailBuilder(data) {
 // GmailGateWay.send()
 GmailApp.sendEmail(emailPayload.to, emailPayload.subject, "", {
   htmlBody: emailPayload.html,
-  name: 'MultSoft Desenvolvimento de Sistemas',
-  cc: 'administrativo@multbovinos.com.br'
+  name: 'NOME_EMPRESA',
+  cc: 'email@teste.com.br'
 })
 ```
  
