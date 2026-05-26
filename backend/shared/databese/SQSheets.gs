@@ -11,8 +11,8 @@ class SQSheets {
         .getScriptProperties()
         .getProperty('ENV');
 
-      const DEV_ID = '1CtxP0LOipQvtx8bdX40_F3I1yoLsojDmb3R3tK4YaP8';
-      const PROD_ID = '1CtxP0LOipQvtx8bdX40_F3I1yoLsojDmb3R3tK4YaP8';
+      const DEV_ID = 'ID_SHEET_DESENVOLVIMENTO';
+      const PROD_ID = 'ID_SHEET_PRODUCAO';
 
       SQSheets._ss = SpreadsheetApp.openById(
         env === 'PROD' ? PROD_ID : DEV_ID

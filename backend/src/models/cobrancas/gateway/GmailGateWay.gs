@@ -1,8 +1,8 @@
 class GmailGateWay {
   
   constructor() {
-    this._emailsCC = `administrativo@multbovinos.com.br`
-    this._nome = 'MultSoft Desenvolvimento de Sistemas'
+    this._emailsCC = `email@teste.com.br`
+    this._nome = 'NOME_DA_EMPRESA'
   }
 
   send(emailPayload) {
