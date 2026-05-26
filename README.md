@@ -987,7 +987,7 @@ O frontend recebe o `link` e abre em nova aba com `window.open(link, '_blank')`.
 _emailBuilder(data) {
   // Monta HTML completo com tabela de faturas
   // Assunto = título da régua
-  // CC automático para administrativo@multbovinos.com.br
+  // CC automático para email
   return { to: email, subject: reguaPrincipal.titulo, html: corpoEmail }
 }
  
