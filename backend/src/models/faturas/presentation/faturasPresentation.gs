@@ -42,7 +42,7 @@ function faturasPresentations() {
 
     actions: [
       { type: 'edit-fatura', title: "Editar", icon: 'square-pen' },
-      { type: 'delete', title: "Deletar", icon: 'trash-2' },
+      //{ type: 'delete', title: "Deletar", icon: 'trash-2' },
       { type: 'cobrar', title: "Cobrar", icon: 'hand-coins' },
     ],
 

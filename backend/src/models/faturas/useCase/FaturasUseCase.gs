@@ -1,12 +1,7 @@
 function TestFaturasUseCase() {
 
-    const value = "R$ 1.548,33"
-    const parseValue = (value) => {
-      const cleanString = value.toString().replace(/[R$\s.]/g, "").replace(",", ".");
-      return  cleanString //parseFloat(cleanString) || 0
-    }
-
-    console.log(parseValue(value))
+  const faturas = new FaturasUseCase({faturasRepository: new SheetsFaturasRepository()}).getById('9a5f8a30-e492-437e-a899-565d7df80657')
+  console.log(faturas)
 
 }
 
@@ -130,8 +125,6 @@ class FaturasUseCase {
 
   importCsv({ data }) {
 
-    this._validateImportData(data)
-
     const rows = this._normalizeImportRows(data)
 
     if (!rows.length) {
@@ -151,51 +144,6 @@ class FaturasUseCase {
     return {
       importedFaturas: faturas.length,
       createdClients
-    }
-  }
-
-  _validateImportData(data) {
-
-    return
-    if (!Array.isArray(data)) {
-      throw new Error('Dados inválidos para importação')
-    }
-
-    if (!data.length) {
-      throw new Error('Nenhuma linha encontrada')
-    }
-
-    const expectedHeaders = [
-      'Cód.',
-      'Cód.Cliente',
-      'Contato',
-      'Dt. Venc.',
-      'Valor',
-      'Baixado',
-      'Dt. Baixa',
-      'Total',
-      'Histórico'
-    ]
-
-    const normalize = (value) =>
-      String(value || '')
-        .replace(/\uFEFF/g, '')
-        .replace(/\s+/g, ' ')
-        .trim()
-        .normalize('NFC')
-
-    const receivedHeaders = Object.keys(data[0]).map(normalize)
-
-    const valid =
-      receivedHeaders.length === expectedHeaders.length &&
-      expectedHeaders
-        .map(normalize)
-        .every((header, index) => header === receivedHeaders[index])
-
-    if (!valid) {
-      throw new Error(
-        `Cabeçalho inválido. Esperado: ${expectedHeaders.join(', ')}`
-      )
     }
   }
 
@@ -347,28 +295,39 @@ class FaturasUseCase {
 
   // Relpers
   _parseDate(value) {
+
     if (value == null) return null;
 
     const raw = String(value).trim();
+
     if (!raw) return null;
 
-    const parsed = new Date(raw);
-    if (!isNaN(parsed)) return parsed;
+    // ISO
+    if (/^\d{4}-\d{2}-\d{2}/.test(raw)) {
 
-    const parts = raw.split(/[-\/\.]/).map(part => part.trim());
+      const isoDate = new Date(raw);
+
+      return isNaN(isoDate) ? null : isoDate;
+    }
+
+    // BR => DD/MM/YYYY
+    const parts = raw.split(/[\/\-\.]/).map(p => p.trim());
+
     if (parts.length !== 3) return null;
 
     let [day, month, year] = parts;
-    if (year.length === 2) {
-      year = `20${year}`;
+
+    day = Number(day);
+    month = Number(month);
+    year = Number(year);
+
+    if (year < 100) {
+      year += 2000;
     }
 
-    if (day.length === 1) day = `0${day}`;
-    if (month.length === 1) month = `0${month}`;
+    const parsed = new Date(Date.UTC(year, month - 1, day));
 
-    const iso = `${year}-${month}-${day}`;
-    const fallback = new Date(iso);
-    return isNaN(fallback) ? null : fallback;
+    return isNaN(parsed) ? null : parsed;
   }
 
   _parseCurrency(value) {

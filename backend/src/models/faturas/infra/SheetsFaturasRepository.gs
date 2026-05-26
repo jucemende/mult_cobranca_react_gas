@@ -1,10 +1,9 @@
 function TestFaturasRepository() {
   
-  const boot = bootstrapCliente().vendedores()
   //const vendedor = bootstrapRepoCliente().vendedor
-  const clientes = new SheetsClienteRepository().getById('424a')
+  const faturas = new SheetsFaturasRepository().getById('952fcf95-1bca-4d73-a7a3-f72e10078c16')
   
-  console.log(clientes)
+  console.log(faturas)
 
 }
 

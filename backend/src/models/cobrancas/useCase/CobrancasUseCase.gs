@@ -1,10 +1,33 @@
 function TestCobrancasUseCase() {
   
+  const faturas = [
+    {
+      id: '952fcf95-1bca-4d73-a7a3-f72e10078c16',
+      documento: 80502,
+      codCliente: 10462,
+      clienteId: '10462a',
+      cliente: 'PAULO SERGIO FERIANI',
+      email: 'nfe.feriani@gmail.com;grupoferiani@gmail.com;karlaferiani@ucl.br',
+      telefone: '(28) 9998-9414',
+      idVendedor: null,
+      vencimento: '05/06/2026', //'2026-05-06T03:00:00.000Z',
+      status: 'VENCIDA',
+      diasAtraso: 20,
+      vlrLiquido: 'R$ 1.322,16',
+      tipoDocumento: 'MENSALIDADE',
+      criadoEm: '2026-05-25T19:54:26.958Z',
+      cobrado: true,
+      multa: 'R$ 26,44',
+      juros: 'R$ 8,73',
+      total: 'R$ 1.357,33'
+    }
+  ]
+
   const serviceCharges = new CobrancasUseCase(
     {cobrancasRepository: new SheetsCobrancasRepository()}
   )
 
-  const chargesView = serviceCharges.getById('47953')
+  const chargesView = serviceCharges.getView(faturas)
 
   console.log(chargesView)
 

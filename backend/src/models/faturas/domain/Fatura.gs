@@ -3,7 +3,7 @@ function TestDomainFatura() {
   const data = {
     documento: 1234,
     codCliente: 1234,
-    vencimento: '2026/02/31',
+    vencimento: '2026-06-05T03:00:00.000Z',
     vlrLiquido: 550.00,
     possuiEncargos: true
   }
