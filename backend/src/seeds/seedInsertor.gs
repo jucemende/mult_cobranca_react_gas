@@ -1,6 +1,7 @@
 /**
  * Insertor de Dados Seed nas Planilhas
  * Insere dados genéricos para teste diretamente nas abas do Google Sheets
+ * Alinhado com a nova estrutura de seedData.gs
  * Uso: Execute insertAllSeedData() no console do Apps Script
  */
 
@@ -14,12 +15,12 @@ function insertAllSeedData() {
     
     console.log('🚀 Iniciando inserção de dados seed...');
     
-    insertClientesData(seedData.clientes);
-    insertVendedoresData(seedData.vendedores);
-    insertFaturasData(seedData.faturas);
-    insertEncargosData(seedData.encargos);
-    insertCobrancasData(seedData.cobrancas);
-    insertReguasData(seedData.reguas);
+    insertVendedoresData(seedData.bdVendedores);
+    insertConfigEncargosData(seedData.bdConfigEncargos);
+    insertConfigReguaData(seedData.bdConfigRegua);
+    insertClientesData(seedData.bdClientes);
+    insertFaturasAbertasData(seedData.bdFaturasAbertas);
+    insertCobrancasData(seedData.bdCobrancas);
     
     console.log('✅ Todos os dados seed foram inseridos com sucesso!');
     
@@ -40,49 +41,18 @@ function insertAllSeedData() {
 }
 
 /**
- * Insere dados de clientes na aba 'bdClientes'
- */
-function insertClientesData(clientes) {
-  console.log(`📊 Inserindo ${clientes.length} clientes...`);
-  
-  const rows = clientes.map(cliente => ({
-    id: Utilities.getUuid(),
-    cod: cliente.codCliente,
-    cliente: cliente.nome,
-    cnpj_cpf: cliente.cnpj,
-    email: cliente.email,
-    telefone: cliente.telefone,
-    endereco: cliente.endereco,
-    cidade: cliente.cidade,
-    estado: cliente.estado,
-    cep: cliente.cep,
-    status: cliente.perfil === 'CRITICA' ? 'ATIVO' : 'ATIVO',
-    perfil: cliente.perfil,
-    permite_notificacao: true,
-    criado_em: cliente.dataCadastro.toISOString()
-  }));
-  
-  const db = new SQSheets({ tableName: 'bdClientes', idField: 'id' });
-  db.insert(rows);
-  
-  console.log(`✅ ${clientes.length} clientes inseridos`);
-}
-
-/**
  * Insere dados de vendedores na aba 'bdVendedores'
+ * Schema: id, vendedor, email, comissao, criado_em
  */
 function insertVendedoresData(vendedores) {
   console.log(`📊 Inserindo ${vendedores.length} vendedores...`);
   
   const rows = vendedores.map(vendedor => ({
-    id: Utilities.getUuid(),
-    vendedor: vendedor.nome,
+    id: vendedor.id,
+    vendedor: vendedor.vendedor,
     email: vendedor.email,
-    telefone: vendedor.telefone,
-    regiao: vendedor.regiao,
     comissao: vendedor.comissao,
-    ativo: vendedor.ativo ? 'SIM' : 'NÃO',
-    criado_em: vendedor.dataCadastro.toISOString()
+    criado_em: vendedor.criado_em instanceof Date ? vendedor.criado_em.toISOString() : vendedor.criado_em
   }));
   
   const db = new SQSheets({ tableName: 'bdVendedores', idField: 'id' });
@@ -92,23 +62,95 @@ function insertVendedoresData(vendedores) {
 }
 
 /**
- * Insere dados de faturas na aba 'bdFaturasAbertas'
+ * Insere dados de configuração de encargos na aba 'bdConfigEncargos'
+ * Schema: id, taxa_juros, tipo_cobranca, aplicacao, recorrencia, criado_em
  */
-function insertFaturasData(faturas) {
+function insertConfigEncargosData(configEncargos) {
+  console.log(`📊 Inserindo ${configEncargos.length} configurações de encargos...`);
+  
+  const rows = configEncargos.map(config => ({
+    id: config.id,
+    taxa_juros: config.taxa_juros,
+    tipo_cobranca: config.tipo_cobranca,
+    aplicacao: config.aplicacao,
+    recorrencia: config.recorrencia,
+    criado_em: config.criado_em instanceof Date ? config.criado_em.toISOString() : config.criado_em
+  }));
+  
+  const db = new SQSheets({ tableName: 'bdConfigEncargos', idField: 'id' });
+  db.insert(rows);
+  
+  console.log(`✅ ${configEncargos.length} configurações de encargos inseridas`);
+}
+
+/**
+ * Insere dados de configuração de régua na aba 'bdConfigRegua'
+ * Schema: id, fase_regua, titulo, atraso_de, atraso_ate, acoes_regua, permite_bloqueio, mensagem_padrao, criado_em
+ */
+function insertConfigReguaData(configRegua) {
+  console.log(`📊 Inserindo ${configRegua.length} configurações de régua...`);
+  
+  const rows = configRegua.map(regua => ({
+    id: regua.id,
+    fase_regua: regua.fase_regua,
+    titulo: regua.titulo,
+    atraso_de: regua.atraso_de,
+    atraso_ate: regua.atraso_ate,
+    acoes_regua: regua.acoes_regua,
+    permite_bloqueio: regua.permite_bloqueio ? 'SIM' : 'NÃO',
+    mensagem_padrao: regua.mensagem_padrao,
+    criado_em: regua.criado_em instanceof Date ? regua.criado_em.toISOString() : regua.criado_em
+  }));
+  
+  const db = new SQSheets({ tableName: 'bdConfigRegua', idField: 'id' });
+  db.insert(rows);
+  
+  console.log(`✅ ${configRegua.length} configurações de régua inseridas`);
+}
+
+/**
+ * Insere dados de clientes na aba 'bdClientes'
+ * Schema: id, cod, id_vendedor, cliente, tipo, cnpj_cpf, telefone, email, status, permite_notificacao, obs, criado_em
+ */
+function insertClientesData(clientes) {
+  console.log(`📊 Inserindo ${clientes.length} clientes...`);
+  
+  const rows = clientes.map(cliente => ({
+    id: cliente.id,
+    cod: cliente.cod,
+    id_vendedor: cliente.id_vendedor,
+    cliente: cliente.cliente,
+    tipo: cliente.tipo,
+    cnpj_cpf: cliente.cnpj_cpf,
+    telefone: cliente.telefone,
+    email: cliente.email,
+    status: cliente.status,
+    permite_notificacao: cliente.permite_notificacao ? 'SIM' : 'NÃO',
+    obs: cliente.obs,
+    criado_em: cliente.criado_em instanceof Date ? cliente.criado_em.toISOString() : cliente.criado_em
+  }));
+  
+  const db = new SQSheets({ tableName: 'bdClientes', idField: 'id' });
+  db.insert(rows);
+  
+  console.log(`✅ ${clientes.length} clientes inseridos`);
+}
+
+/**
+ * Insere dados de faturas abertas na aba 'bdFaturasAbertas'
+ * Schema: id, documento, cod, vencimento, vlr_liquido, possui_encargos, criado_em
+ */
+function insertFaturasAbertasData(faturas) {
   console.log(`📊 Inserindo ${faturas.length} faturas...`);
   
   const rows = faturas.map(fatura => ({
-    id: Utilities.getUuid(),
-    documento: String(fatura.documento),
-    cod: String(fatura.codCliente),
-    cliente: fatura.cliente,
-    data_emissao: fatura.dataEmissao.toISOString().split('T')[0],
-    vencimento: fatura.dataVencimento.toISOString().split('T')[0],
-    vlr_liquido: fatura.valor,
-    descricao: fatura.descricao,
-    status: fatura.status,
-    possui_encargos: fatura.valor > 5000 ? 'SIM' : 'NÃO',
-    criado_em: new Date().toISOString()
+    id: fatura.id,
+    documento: fatura.documento,
+    cod: fatura.cod,
+    vencimento: fatura.vencimento instanceof Date ? fatura.vencimento.toISOString().split('T')[0] : fatura.vencimento,
+    vlr_liquido: fatura.vlr_liquido,
+    possui_encargos: fatura.possui_encargos ? 'SIM' : 'NÃO',
+    criado_em: fatura.criado_em instanceof Date ? fatura.criado_em.toISOString() : fatura.criado_em
   }));
   
   const db = new SQSheets({ tableName: 'bdFaturasAbertas', idField: 'id' });
@@ -118,75 +160,30 @@ function insertFaturasData(faturas) {
 }
 
 /**
- * Insere dados de encargos na aba 'bdConfigEncargos'
- */
-function insertEncargosData(encargos) {
-  console.log(`📊 Inserindo ${encargos.length} encargos...`);
-  
-  const rows = encargos.map(encargo => ({
-    id: Utilities.getUuid(),
-    fatura_id: Utilities.getUuid(), // referência à fatura
-    tipo: encargo.tipo,
-    percentual: encargo.percentual,
-    valor: encargo.valor,
-    descricao: encargo.descricao,
-    criado_em: new Date().toISOString()
-  }));
-  
-  const db = new SQSheets({ tableName: 'bdConfigEncargos', idField: 'id' });
-  db.insert(rows);
-  
-  console.log(`✅ ${encargos.length} encargos inseridos`);
-}
-
-/**
  * Insere dados de cobranças na aba 'bdCobrancas'
+ * Schema: id, documento, cliente_id, dias_atraso, vlr_liquido, data_contato, regua_id, canal, acao, status, criado_em
  */
 function insertCobrancasData(cobrancas) {
   console.log(`📊 Inserindo ${cobrancas.length} cobranças...`);
   
   const rows = cobrancas.map(cobranca => ({
-    id: String(cobranca.id),
-    documento: String(cobranca.faturasId),
-    cod_cliente: String(cobranca.codCliente),
-    cliente: cobranca.cliente,
-    perfil: cobranca.perfil,
+    id: cobranca.id,
+    documento: cobranca.documento,
+    cliente_id: cobranca.cliente_id,
+    dias_atraso: cobranca.dias_atraso,
+    vlr_liquido: cobranca.vlr_liquido,
+    data_contato: cobranca.data_contato instanceof Date ? cobranca.data_contato.toISOString().split('T')[0] : cobranca.data_contato,
+    regua_id: cobranca.regua_id,
     canal: cobranca.canal,
     acao: cobranca.acao,
     status: cobranca.status,
-    email: cobranca.email,
-    telefone: cobranca.telefone,
-    data_envio: cobranca.dataEnvio.toISOString().split('T')[0],
-    data_resposta: cobranca.dataResposta ? cobranca.dataResposta.toISOString().split('T')[0] : '',
-    resultado: cobranca.resultado,
-    criado_em: new Date().toISOString()
+    criado_em: cobranca.criado_em instanceof Date ? cobranca.criado_em.toISOString() : cobranca.criado_em
   }));
   
   const db = new SQSheets({ tableName: 'bdCobrancas', idField: 'id' });
   db.insert(rows);
   
   console.log(`✅ ${cobrancas.length} cobranças inseridas`);
-}
-
-/**
- * Insere dados de réguas na aba 'bdConfigRegua'
- */
-function insertReguasData(reguas) {
-  console.log(`📊 Inserindo ${reguas.length} réguas...`);
-  
-  const rows = reguas.map(regua => ({
-    id: Utilities.getUuid(),
-    nome: regua.nome,
-    descricao: regua.descricao,
-    ativa: regua.ativa ? 'SIM' : 'NÃO',
-    etapas_json: JSON.stringify(regua.etapas),
-    criado_em: new Date().toISOString()
-  }));
-  
-  const db = new SQSheets({ tableName: 'bdConfigRegua', idField: 'id' });
-  db.insert(rows);
-  
-  console.log(`✅ ${reguas.length} réguas inseridas`);
 }
 
 /**
@@ -202,12 +199,12 @@ function clearAllSeedData() {
   try {
     console.log('🗑️ Limpando dados...');
     
-    clearTableData('bdClientes');
     clearTableData('bdVendedores');
-    clearTableData('bdFaturasAbertas');
     clearTableData('bdConfigEncargos');
-    clearTableData('bdCobrancas');
     clearTableData('bdConfigRegua');
+    clearTableData('bdClientes');
+    clearTableData('bdFaturasAbertas');
+    clearTableData('bdCobrancas');
     
     console.log('✅ Todos os dados foram deletados');
     
@@ -248,20 +245,24 @@ function clearTableData(tableName) {
  */
 function getSeedDataStats() {
   const tables = [
-    'bdClientes',
     'bdVendedores',
-    'bdFaturasAbertas',
     'bdConfigEncargos',
-    'bdCobrancas',
-    'bdConfigRegua'
+    'bdConfigRegua',
+    'bdClientes',
+    'bdFaturasAbertas',
+    'bdCobrancas'
   ];
   
   const stats = {};
   
   tables.forEach(tableName => {
-    const db = new SQSheets({ tableName, idField: 'id' });
-    const data = db.load();
-    stats[tableName] = data.length;
+    try {
+      const db = new SQSheets({ tableName, idField: 'id' });
+      const data = db.load();
+      stats[tableName] = data.length;
+    } catch (e) {
+      stats[tableName] = 'Erro ao carregar';
+    }
   });
   
   console.log('📊 Estatísticas de dados:', stats);
